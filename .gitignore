@@ -1,0 +1,12 @@
+# Secrets
+*.env
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
