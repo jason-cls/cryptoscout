@@ -52,6 +52,22 @@ class Exchange(BaseModel):
     updated: datetime
 
 
+class AssetHistory(BaseModel):
+    priceUsd: NonNegativeFloat
+    time: NonNegativeInt
+    circulatingSupply: NonNegativeFloat
+    date: datetime
+
+
+class MarketHistory(BaseModel):
+    open: NonNegativeFloat
+    high: NonNegativeFloat
+    low: NonNegativeFloat
+    close: NonNegativeFloat
+    volume: NonNegativeFloat
+    period: datetime
+
+
 class AssetInfoResponse(BaseModel):
     data: CryptoAsset
     timestamp: datetime
@@ -59,4 +75,14 @@ class AssetInfoResponse(BaseModel):
 
 class ExchangeInfoResponse(BaseModel):
     data: Exchange
+    timestamp: datetime
+
+
+class AssetHistoryResponse(BaseModel):
+    data: list[AssetHistory]
+    timestamp: datetime
+
+
+class MarketHistoryResponse(BaseModel):
+    data: list[MarketHistory]
     timestamp: datetime

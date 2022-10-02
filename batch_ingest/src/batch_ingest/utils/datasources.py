@@ -35,3 +35,42 @@ def get_exchange_info(
     headers = {"Authorization": f"Bearer {api_key}"}
     response = http.get(ENDPOINT, headers=headers, timeout=timeout)
     return response.json()
+
+
+def get_asset_history(
+    asset_id: str,
+    api_key: str,
+    start_ms: int | None,
+    end_ms: int | None,
+    interval: str = "h1",
+    timeout: int | float = DEFAULT_TIMEOUT,
+) -> dict[str, Any]:
+    ENDPOINT = f"https://api.coincap.io/v2/assets/{asset_id}/history"
+    headers = {"Authorization": f"Bearer {api_key}"}
+    params = {"interval": interval, "start": start_ms, "end": end_ms}
+    response = http.get(ENDPOINT, headers=headers, params=params, timeout=timeout)
+    return response.json()
+
+
+def get_market_history(
+    exchange_id: str,
+    base_id: str,
+    quote_id: str,
+    api_key: str,
+    start_ms: int | None,
+    end_ms: int | None,
+    interval: str = "h1",
+    timeout: int | float = DEFAULT_TIMEOUT,
+) -> dict[str, Any]:
+    ENDPOINT = "https://api.coincap.io/v2/candles"
+    headers = {"Authorization": f"Bearer {api_key}"}
+    params = {
+        "exchange": exchange_id,
+        "baseId": base_id,
+        "quoteId": quote_id,
+        "interval": interval,
+        "start": start_ms,
+        "end": end_ms,
+    }
+    response = http.get(ENDPOINT, headers=headers, params=params, timeout=timeout)
+    return response.json()
