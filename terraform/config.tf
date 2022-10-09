@@ -3,6 +3,8 @@ locals {
   project     = "cryptoscout"
   region      = "us-central1"
   zone        = "us-central1-b"
+
+  terraform_sa_name = "terraform"
 }
 
 terraform {

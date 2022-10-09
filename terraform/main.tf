@@ -21,10 +21,18 @@ resource "google_service_account" "batch" {
   description  = "Executes batch ingestion jobs"
 }
 
-resource "google_project_iam_member" "object_admin" {
+resource "google_project_iam_member" "batch" {
+  for_each = toset(var.service_account_roles.batch)
+
   project = local.project
-  role    = "roles/storage.objectAdmin"
+  role    = each.value
   member  = "serviceAccount:${google_service_account.batch.email}"
+}
+
+resource "google_service_account_iam_member" "batch_account_iam" {
+  service_account_id = google_service_account.batch.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${local.terraform_sa_name}@${local.project}.iam.gserviceaccount.com"
 }
 
 resource "google_project_service" "iam" {
