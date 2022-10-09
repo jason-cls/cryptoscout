@@ -5,11 +5,12 @@
 # Uses gcloud cli to configure the following resources in an existing GCP project:
 #   - Service account for Terraform. A corresponding key is saved locally.
 #   - GCS bucket to store Terraform remote state
+#   - Enables GCP APIs to interface with Terraform
 
 
 GCP_PROJECT="cryptoscout"
 SERVICEACC_NAME="terraform"
-SERVICEACC_ROLES=("roles/editor" "roles/storage.objectAdmin")
+SERVICEACC_ROLES=("roles/editor" "roles/iam.securityAdmin" "roles/storage.objectAdmin")
 GCS_TFBACKEND_BKT_NAME="terraform-backend-cs"
 GCS_BKT_LOCATION="us-central1"
 
@@ -52,3 +53,6 @@ gcloud storage buckets create gs://${GCS_TFBACKEND_BKT_NAME} \
 gcloud storage buckets update gs://${GCS_TFBACKEND_BKT_NAME} \
   --project=$GCP_PROJECT \
   --versioning
+
+# Enable essential GCP APIs
+gcloud services enable serviceusage.googleapis.com cloudresourcemanager.googleapis.com --project $GCP_PROJECT

@@ -1,5 +1,6 @@
 locals {
   credentials = "${path.root}/secrets/terraform-sa-key.json"
+  project     = "cryptoscout"
   region      = "us-central1"
   zone        = "us-central1-b"
 }
