@@ -1,6 +1,6 @@
 # Secrets
 *.env
-terraform-sa-key.json
+*-sa-key.json
 encryptionkey.gcs.tfbackend
 
 # Byte-compiled / optimized / DLL files
