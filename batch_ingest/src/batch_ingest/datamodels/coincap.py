@@ -1,4 +1,6 @@
+import logging
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel as PydanticBaseModel
 from pydantic import (
@@ -8,7 +10,14 @@ from pydantic import (
     Field,
     HttpUrl,
     PositiveInt,
+    validator,
 )
+
+
+def data_non_empty_warning(data: list[Any]) -> list[Any]:
+    if len(data) == 0:
+        logging.warning("Empty list returned for data field.")
+    return data
 
 
 class BaseModel(PydanticBaseModel):
@@ -82,7 +91,11 @@ class AssetHistoryResponse(BaseModel):
     data: list[AssetHistory]
     timestamp: datetime
 
+    _nonempty_data = validator("data", allow_reuse=True)(data_non_empty_warning)
+
 
 class MarketHistoryResponse(BaseModel):
     data: list[MarketHistory]
     timestamp: datetime
+
+    _nonempty_data = validator("data", allow_reuse=True)(data_non_empty_warning)
