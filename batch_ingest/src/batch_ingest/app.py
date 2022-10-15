@@ -3,7 +3,7 @@ import json
 import logging
 import os
 
-import utils.datasources as dsrc
+import extractors.coincap as coincap
 from datamodels.coincap import (
     AssetHistoryResponse,
     AssetInfoResponse,
@@ -41,10 +41,10 @@ unix_end = 1641081600000
 
 # Asset data
 for asset_id in ASSET_IDS:
-    asset_info = dsrc.get_asset_info(asset_id, COINCAP_API_KEY)
+    asset_info = coincap.get_asset_info(asset_id, COINCAP_API_KEY)
     asset_info, valparse = try_valparse(asset_info, AssetInfoResponse)
 
-    asset_prices = dsrc.get_asset_history(
+    asset_prices = coincap.get_asset_history(
         asset_id, COINCAP_API_KEY, unix_start, unix_end, INTERVAL
     )
     asset_prices, valparse = try_valparse(asset_prices, AssetHistoryResponse)
@@ -54,13 +54,13 @@ for asset_id in ASSET_IDS:
 
 # Exchange data
 for exchange_id in EXCHANGE_IDS:
-    exchange_info = dsrc.get_exchange_info(exchange_id, COINCAP_API_KEY)
+    exchange_info = coincap.get_exchange_info(exchange_id, COINCAP_API_KEY)
     exchange_info, valparse = try_valparse(exchange_info, ExchangeInfoResponse)
 
 # Market history (candlestick) data
 for exchange_id in EXCHANGE_IDS:
     for asset_id in ASSET_IDS:
-        market_candles = dsrc.get_market_history(
+        market_candles = coincap.get_market_history(
             exchange_id,
             asset_id,
             QUOTE_ID,
