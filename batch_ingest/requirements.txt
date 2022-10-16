@@ -4,18 +4,56 @@
 #
 #    pip-compile
 #
+cachetools==5.2.0
+    # via google-auth
 certifi==2022.9.24
     # via requests
 charset-normalizer==2.1.1
     # via requests
+google-api-core==2.10.2
+    # via
+    #   google-cloud-core
+    #   google-cloud-storage
+google-auth==2.12.0
+    # via
+    #   google-api-core
+    #   google-cloud-core
+    #   google-cloud-storage
+google-cloud-core==2.3.2
+    # via google-cloud-storage
+google-cloud-storage==2.5.0
+    # via -r requirements.in
+google-crc32c==1.5.0
+    # via google-resumable-media
+google-resumable-media==2.4.0
+    # via google-cloud-storage
+googleapis-common-protos==1.56.4
+    # via google-api-core
 idna==3.4
     # via requests
+protobuf==4.21.7
+    # via
+    #   google-api-core
+    #   googleapis-common-protos
+pyasn1==0.4.8
+    # via
+    #   pyasn1-modules
+    #   rsa
+pyasn1-modules==0.2.8
+    # via google-auth
 pydantic==1.10.2
     # via -r requirements.in
 python-dotenv==0.21.0
     # via -r requirements.in
 requests==2.28.1
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   google-api-core
+    #   google-cloud-storage
+rsa==4.9
+    # via google-auth
+six==1.16.0
+    # via google-auth
 typing-extensions==4.3.0
     # via pydantic
 urllib3==1.26.12
