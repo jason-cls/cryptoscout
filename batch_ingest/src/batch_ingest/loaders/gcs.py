@@ -7,7 +7,7 @@ from google.cloud import storage
 
 def upload_json_from_memory(
     bucket_name: str, blob_name: str, data: dict[str, Any], valparsed: bool
-):
+) -> bool:
     """
     Uploads data as a JSON formatted string to a GCS bucket.
 
@@ -16,6 +16,9 @@ def upload_json_from_memory(
         blob_name: Name of the blob object to store in the bucket
         data: In-memory object to serialize to JSON and upload
         valparsed: Boolean flag indicating if data has been validated prior
+
+    Returns:
+        A boolean indicating if data was successfuly uploaded to GCS.
     """
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
@@ -36,3 +39,5 @@ def upload_json_from_memory(
             "Following upload request, blob does not exist at"
             f" gs://{bucket_name}/{blob_name}"
         )
+        return False
+    return True

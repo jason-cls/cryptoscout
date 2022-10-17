@@ -2,19 +2,14 @@ import configparser
 import json
 import logging
 import os
-import time
-from datetime import datetime, timezone
 
-import extractors.coincap as coincap
-import loaders.gcs as gcs
-from datamodels.coincap import (
-    AssetHistoryResponse,
-    AssetInfoResponse,
-    ExchangeInfoResponse,
-    MarketHistoryResponse,
-)
 from dotenv import load_dotenv
-from utils.validate import try_valparse
+from pipelines.coincap_to_gcs import (
+    ingest_asset_history,
+    ingest_asset_info,
+    ingest_exchange_info,
+    ingest_market_history,
+)
 
 file_dir = os.path.dirname(os.path.realpath(__file__))
 os.chdir(file_dir)
@@ -40,105 +35,55 @@ logging.basicConfig(
 )
 
 
-unix_start = 1640995200000
-unix_end = 1641081600000
+unix_start_ms = 1640995200000
+unix_end_ms = 1641081600000
 
-# Asset data
+# Asset info
+success = True
 for asset_id in ASSET_IDS:
-    # Asset Info
-    asset_info = coincap.get_asset_info(asset_id, COINCAP_API_KEY)
-    ts_unix = asset_info.get("timestamp", round(time.time() * 1000)) / 1000.0
-    asset_info, valparse = try_valparse(asset_info, AssetInfoResponse)
+    success *= ingest_asset_info(asset_id, COINCAP_API_KEY, TARGET_BUCKET)
+if success:
+    logging.info("Successfully ingested all asset info data!")
+else:
+    logging.error("Failed to ingest all asset info data.")
 
-    dt = datetime.fromtimestamp(ts_unix, timezone.utc)
-    yyyy, mm, dd = dt.strftime("%Y-%m-%d").split("-")
-    yyyymmdd = yyyy + mm + dd
-
-    gcs.upload_json_from_memory(
-        bucket_name=TARGET_BUCKET,
-        blob_name=(
-            f"coincap/asset_info/year={yyyy}/month={mm}/day={dd}"
-            f"/asset_info_{asset_id}_{yyyymmdd}.json"
-        ),
-        data=asset_info,
-        valparsed=valparse,
+# Asset history
+success = True
+for asset_id in ASSET_IDS:
+    success *= ingest_asset_history(
+        asset_id, COINCAP_API_KEY, unix_start_ms, unix_end_ms, INTERVAL, TARGET_BUCKET
     )
+if success:
+    logging.info("Successfully ingested all asset history data!")
+else:
+    logging.error("Failed to ingest all asset history data.")
 
-    # Asset history
-    asset_history = coincap.get_asset_history(
-        asset_id, COINCAP_API_KEY, unix_start, unix_end, INTERVAL
-    )
-    asset_history, valparse = try_valparse(asset_history, AssetHistoryResponse)
-
-    if len(asset_history["data"]) == 0:
-        logging.warning(f"AssetHistory data missing for: {asset_id}")
-
-    dt_start = datetime.fromtimestamp(unix_start / 1000.0, timezone.utc)
-    yyyy, mm, dd = dt_start.strftime("%Y-%m-%d").split("-")
-    yyyymmdd = yyyy + mm + dd
-
-    gcs.upload_json_from_memory(
-        bucket_name=TARGET_BUCKET,
-        blob_name=(
-            f"coincap/asset_history/year={yyyy}/month={mm}/day={dd}"
-            f"/asset_history_{asset_id}_{yyyymmdd}.json"
-        ),
-        data=asset_history,
-        valparsed=valparse,
-    )
-
-# Exchange data
+# Exchange info
+success = True
 for exchange_id in EXCHANGE_IDS:
-    exchange_info = coincap.get_exchange_info(exchange_id, COINCAP_API_KEY)
-    ts_unix = exchange_info["data"].get("updated", round(time.time() * 1000)) / 1000.0
-    exchange_info, valparse = try_valparse(exchange_info, ExchangeInfoResponse)
-
-    dt = datetime.fromtimestamp(ts_unix, timezone.utc)
-    yyyy, mm, dd = dt.strftime("%Y-%m-%d").split("-")
-    yyyymmdd = yyyy + mm + dd
-
-    gcs.upload_json_from_memory(
-        bucket_name=TARGET_BUCKET,
-        blob_name=(
-            f"coincap/exchange_info/year={yyyy}/month={mm}/day={dd}"
-            f"/exchange_info_{exchange_id}_{yyyymmdd}.json"
-        ),
-        data=exchange_info,
-        valparsed=valparse,
-    )
+    success *= ingest_exchange_info(exchange_id, COINCAP_API_KEY, TARGET_BUCKET)
+if success:
+    logging.info("Successfully ingested all exchange info data!")
+else:
+    logging.error("Failed to ingest all exchange info data.")
 
 # Market history (candlestick) data
+success = True
 for exchange_id in EXCHANGE_IDS:
     for asset_id in ASSET_IDS:
-        market_history = coincap.get_market_history(
+        success *= ingest_market_history(
             exchange_id,
             asset_id,
             QUOTE_ID,
             COINCAP_API_KEY,
-            unix_start,
-            unix_end,
+            unix_start_ms,
+            unix_end_ms,
             INTERVAL,
+            TARGET_BUCKET,
         )
-        market_history, valparse = try_valparse(market_history, MarketHistoryResponse)
-
-        if len(market_history["data"]) == 0:
-            logging.warning(
-                "MarketHistory data missing for exchange/asset pair:"
-                f" {exchange_id}/{asset_id}"
-            )
-
-        dt_start = datetime.fromtimestamp(unix_start / 1000.0, timezone.utc)
-        yyyy, mm, dd = dt_start.strftime("%Y-%m-%d").split("-")
-        yyyymmdd = yyyy + mm + dd
-
-        gcs.upload_json_from_memory(
-            bucket_name=TARGET_BUCKET,
-            blob_name=(
-                f"coincap/market_history/year={yyyy}/month={mm}/day={dd}"
-                f"/market_history_{exchange_id}-{asset_id}_{yyyymmdd}.json"
-            ),
-            data=market_history,
-            valparsed=valparse,
-        )
+if success:
+    logging.info("Successfully ingested all market history data!")
+else:
+    logging.error("Failed to ingest all market history data.")
 
 pass
