@@ -28,7 +28,7 @@ def ingest_asset_info(asset_id: str, api_key: str, target_bucket: str) -> bool:
         A boolean indicating if data was successfully uploaded to GCS.
     """
     asset_info = coincap.get_asset_info(asset_id, api_key)
-    ts_unix = asset_info.get("timestamp", round(time.time() * 1000)) / 1000.0
+    ts_unix = round(asset_info.get("timestamp", time.time() * 1000) / 1000.0)
     asset_info, valparse = try_valparse(asset_info, AssetInfoResponse)
 
     yyyy, mm, dd = unixtime_to_yyyymmdd(ts_unix)
@@ -106,7 +106,7 @@ def ingest_exchange_info(exchange_id: str, api_key: str, target_bucket: str) -> 
         A boolean indicating if data was successfully uploaded to GCS.
     """
     exchange_info = coincap.get_exchange_info(exchange_id, api_key)
-    ts_unix = exchange_info["data"].get("updated", round(time.time() * 1000)) / 1000.0
+    ts_unix = round(exchange_info["data"].get("updated", time.time() * 1000) / 1000.0)
     exchange_info, valparse = try_valparse(exchange_info, ExchangeInfoResponse)
 
     yyyy, mm, dd = unixtime_to_yyyymmdd(ts_unix)
