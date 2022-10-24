@@ -1,4 +1,6 @@
+fastapi
 google-cloud-storage
 pydantic
 python-dotenv
 requests
+uvicorn[standard]
