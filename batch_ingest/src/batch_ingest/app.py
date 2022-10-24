@@ -1,7 +1,9 @@
 import configparser
 import json
 import logging
+import logging.config
 import os
+import time
 
 from dotenv import load_dotenv
 from pipelines.coincap_to_gcs import (
@@ -11,8 +13,11 @@ from pipelines.coincap_to_gcs import (
     ingest_market_history,
 )
 
+# Setup
 file_dir = os.path.dirname(os.path.realpath(__file__))
 os.chdir(file_dir)
+logging.config.fileConfig("logging.cfg")
+logging.Formatter.converter = time.gmtime
 
 # Environment vars
 load_dotenv(override=False)
@@ -27,12 +32,6 @@ QUOTE_ID = coincap_cfg["market_history_quote_id"]
 ASSET_IDS = json.loads(coincap_cfg["asset_ids"])
 EXCHANGE_IDS = json.loads(coincap_cfg["exchange_ids"])
 TARGET_BUCKET = config["gcs"]["target_bucket"]
-
-logging.basicConfig(
-    format="%(asctime)s | %(levelname)s: %(message)s",
-    datefmt="%Y/%m/%d %I:%M:%S %p",
-    level=logging.INFO,
-)
 
 
 unix_start_ms = 1640995200000
