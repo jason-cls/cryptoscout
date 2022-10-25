@@ -16,7 +16,7 @@ from pipelines.coincap_to_gcs import (
 # Setup
 file_dir = os.path.dirname(os.path.realpath(__file__))
 os.chdir(file_dir)
-logging.config.fileConfig("logging.cfg")
+logging.config.fileConfig("logging.cfg", disable_existing_loggers=False)
 logging.Formatter.converter = time.gmtime
 
 # Environment vars
