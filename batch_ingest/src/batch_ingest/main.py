@@ -15,6 +15,7 @@ from pipelines.coincap_to_gcs import (
     ingest_exchange_info,
     ingest_market_history,
 )
+from utils.tools import log_job_status
 
 # Setup
 file_dir = os.path.dirname(os.path.realpath(__file__))
@@ -57,12 +58,7 @@ def ingest_asset_info_job():
     success = True
     for asset_id in ASSET_IDS:
         success *= ingest_asset_info(asset_id, COINCAP_API_KEY, TARGET_BUCKET)
-    if success:
-        msg = "Successfully ingested all asset info data!"
-        logging.info(msg)
-    else:
-        msg = "Failed to ingest all asset info data."
-        logging.error(msg)
+    msg = log_job_status("asset info", bool(success))
     locvars = locals()
     return {
         "success": success,
@@ -90,12 +86,7 @@ def ingest_asset_history_job(unix_start_ms: int, unix_end_ms: int):
             INTERVAL,
             TARGET_BUCKET,
         )
-    if success:
-        msg = "Successfully ingested all asset history data!"
-        logging.info(msg)
-    else:
-        msg = "Failed to ingest all asset history data."
-        logging.error(msg)
+    msg = log_job_status("asset history", bool(success))
     locvars = locals()
     return {
         "success": success,
@@ -115,12 +106,7 @@ def ingest_exchange_info_job():
     success = True
     for exchange_id in EXCHANGE_IDS:
         success *= ingest_exchange_info(exchange_id, COINCAP_API_KEY, TARGET_BUCKET)
-    if success:
-        msg = "Successfully ingested all exchange info data!"
-        logging.info(msg)
-    else:
-        msg = "Failed to ingest all exchange info data."
-        logging.error(msg)
+    msg = log_job_status("exchange info", bool(success))
     locvars = locals()
     return {
         "success": success,
@@ -152,12 +138,7 @@ def ingest_market_history_job(unix_start_ms: int, unix_end_ms: int):
                 INTERVAL,
                 TARGET_BUCKET,
             )
-    if success:
-        msg = "Successfully ingested all market history data!"
-        logging.info(msg)
-    else:
-        msg = "Failed to ingest all market history data."
-        logging.error(msg)
+    msg = log_job_status("market history", bool(success))
     locvars = locals()
     return {
         "success": success,
