@@ -6,6 +6,7 @@ import logging.config
 import os
 import time
 
+from datamodels.api import IngestJobResponse
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
@@ -52,7 +53,7 @@ def root():
     }
 
 
-@app.get("/ingestAssetInfo")
+@app.get("/ingestAssetInfo", response_model=IngestJobResponse)
 def ingest_asset_info_job():
     """Ingests current asset info snapshot data for a fixed set of assets."""
     success = True
@@ -68,11 +69,11 @@ def ingest_asset_info_job():
             k: locvars.get(k)
             for k in inspect.signature(ingest_asset_info_job).parameters.keys()
         },
-        "timestamp": time.time(),
+        "timestamp": round(time.time()),
     }
 
 
-@app.get("/ingestAssetHistory")
+@app.get("/ingestAssetHistory", response_model=IngestJobResponse)
 def ingest_asset_history_job(unix_start_ms: int, unix_end_ms: int):
     """Ingests historical asset data within a time interval for a fixed set of assets.
     """
@@ -96,11 +97,11 @@ def ingest_asset_history_job(unix_start_ms: int, unix_end_ms: int):
             k: locvars.get(k)
             for k in inspect.signature(ingest_asset_history_job).parameters.keys()
         },
-        "timestamp": time.time(),
+        "timestamp": round(time.time()),
     }
 
 
-@app.get("/ingestExchangeInfo")
+@app.get("/ingestExchangeInfo", response_model=IngestJobResponse)
 def ingest_exchange_info_job():
     """Ingests current exchange info snapshot data for a fixed set of exchanges."""
     success = True
@@ -116,11 +117,11 @@ def ingest_exchange_info_job():
             k: locvars.get(k)
             for k in inspect.signature(ingest_exchange_info_job).parameters.keys()
         },
-        "timestamp": time.time(),
+        "timestamp": round(time.time()),
     }
 
 
-@app.get("/ingestMarketHistory")
+@app.get("/ingestMarketHistory", response_model=IngestJobResponse)
 def ingest_market_history_job(unix_start_ms: int, unix_end_ms: int):
     """Ingests historical market data (OHLCV candles) within a time interval for a
     fixed combination of assets and exchanges.
@@ -148,7 +149,7 @@ def ingest_market_history_job(unix_start_ms: int, unix_end_ms: int):
             k: locvars.get(k)
             for k in inspect.signature(ingest_market_history_job).parameters.keys()
         },
-        "timestamp": time.time(),
+        "timestamp": round(time.time()),
     }
 
 
