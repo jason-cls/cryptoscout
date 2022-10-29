@@ -7,8 +7,9 @@ import os
 import time
 
 from datamodels.api import IngestJobResponse
+from dependencies import unix_interval_parameters
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 from fastapi.routing import APIRoute
 from pipelines.coincap_to_gcs import (
     ingest_asset_history,
@@ -74,7 +75,7 @@ def ingest_asset_info_job():
 
 
 @app.get("/ingestAssetHistory", response_model=IngestJobResponse)
-def ingest_asset_history_job(unix_start_ms: int, unix_end_ms: int):
+def ingest_asset_history_job(interval: dict = Depends(unix_interval_parameters)):
     """Ingests historical asset data within a time interval for a fixed set of assets.
     """
     success = True
@@ -82,8 +83,8 @@ def ingest_asset_history_job(unix_start_ms: int, unix_end_ms: int):
         success *= ingest_asset_history(
             asset_id,
             COINCAP_API_KEY,
-            unix_start_ms,
-            unix_end_ms,
+            interval["unix_start_ms"],
+            interval["unix_end_ms"],
             INTERVAL,
             TARGET_BUCKET,
         )
@@ -122,7 +123,7 @@ def ingest_exchange_info_job():
 
 
 @app.get("/ingestMarketHistory", response_model=IngestJobResponse)
-def ingest_market_history_job(unix_start_ms: int, unix_end_ms: int):
+def ingest_market_history_job(interval: dict = Depends(unix_interval_parameters)):
     """Ingests historical market data (OHLCV candles) within a time interval for a
     fixed combination of assets and exchanges.
     """
@@ -134,8 +135,8 @@ def ingest_market_history_job(unix_start_ms: int, unix_end_ms: int):
                 asset_id,
                 QUOTE_ID,
                 COINCAP_API_KEY,
-                unix_start_ms,
-                unix_end_ms,
+                interval["unix_start_ms"],
+                interval["unix_end_ms"],
                 INTERVAL,
                 TARGET_BUCKET,
             )
