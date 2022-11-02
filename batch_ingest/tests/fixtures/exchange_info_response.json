@@ -1,0 +1,14 @@
+{
+   "data" : {
+      "exchangeId" : "kraken",
+      "exchangeUrl" : "https://kraken.com",
+      "name" : "Kraken",
+      "percentTotalVolume" : "1.272194962139607610000000000000000000",
+      "rank" : "14",
+      "socket" : false,
+      "tradingPairs" : "375",
+      "updated" : 1667190132426,
+      "volumeUsd" : "305037766.6472306985090748"
+   },
+   "timestamp" : 1667190147454
+}
