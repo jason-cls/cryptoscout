@@ -6,18 +6,18 @@ import logging.config
 import os
 import time
 
-from datamodels.api import IngestJobResponse
-from dependencies import unix_interval_parameters
-from dotenv import load_dotenv
-from fastapi import Depends, FastAPI
-from fastapi.routing import APIRoute
-from pipelines.coincap_to_gcs import (
+from batch_ingest.datamodels.api import IngestJobResponse
+from batch_ingest.dependencies import unix_interval_parameters
+from batch_ingest.pipelines.coincap_to_gcs import (
     ingest_asset_history,
     ingest_asset_info,
     ingest_exchange_info,
     ingest_market_history,
 )
-from utils.tools import log_job_status
+from batch_ingest.utils.tools import log_job_status
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI
+from fastapi.routing import APIRoute
 
 # Setup
 file_dir = os.path.dirname(os.path.realpath(__file__))
@@ -57,7 +57,7 @@ def root():
 @app.get("/ingestAssetInfo", response_model=IngestJobResponse)
 def ingest_asset_info_job():
     """Ingests current asset info snapshot data for a fixed set of assets."""
-    success = True
+    success: bool | int = True
     for asset_id in ASSET_IDS:
         success *= ingest_asset_info(asset_id, COINCAP_API_KEY, TARGET_BUCKET)
     msg = log_job_status("asset info", bool(success))
@@ -78,7 +78,7 @@ def ingest_asset_info_job():
 def ingest_asset_history_job(interval: dict = Depends(unix_interval_parameters)):
     """Ingests historical asset data within a time interval for a fixed set of assets.
     """
-    success = True
+    success: bool | int = True
     for asset_id in ASSET_IDS:
         success *= ingest_asset_history(
             asset_id,
@@ -105,7 +105,7 @@ def ingest_asset_history_job(interval: dict = Depends(unix_interval_parameters))
 @app.get("/ingestExchangeInfo", response_model=IngestJobResponse)
 def ingest_exchange_info_job():
     """Ingests current exchange info snapshot data for a fixed set of exchanges."""
-    success = True
+    success: bool | int = True
     for exchange_id in EXCHANGE_IDS:
         success *= ingest_exchange_info(exchange_id, COINCAP_API_KEY, TARGET_BUCKET)
     msg = log_job_status("exchange info", bool(success))
@@ -127,7 +127,7 @@ def ingest_market_history_job(interval: dict = Depends(unix_interval_parameters)
     """Ingests historical market data (OHLCV candles) within a time interval for a
     fixed combination of assets and exchanges.
     """
-    success = True
+    success: bool | int = True
     for exchange_id in EXCHANGE_IDS:
         for asset_id in ASSET_IDS:
             success *= ingest_market_history(

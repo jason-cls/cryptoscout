@@ -1,16 +1,16 @@
 import logging
 import time
 
-import extractors.coincap as coincap
-import loaders.gcs as gcs
-from datamodels.coincap import (
+import batch_ingest.extractors.coincap as coincap
+import batch_ingest.loaders.gcs as gcs
+from batch_ingest.datamodels.coincap import (
     AssetHistoryResponse,
     AssetInfoResponse,
     ExchangeInfoResponse,
     MarketHistoryResponse,
 )
-from utils.tools import unixtime_to_yyyymmdd
-from utils.validate import try_valparse
+from batch_ingest.utils.tools import unixtime_to_yyyymmdd
+from batch_ingest.utils.validate import try_valparse
 
 
 def ingest_asset_info(asset_id: str, api_key: str, target_bucket: str) -> bool:
