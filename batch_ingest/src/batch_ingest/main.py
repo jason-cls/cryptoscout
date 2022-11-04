@@ -6,15 +6,15 @@ import logging.config
 import os
 import time
 
-from batch_ingest.datamodels.api import IngestJobResponse
-from batch_ingest.dependencies import unix_interval_parameters
-from batch_ingest.pipelines.coincap_to_gcs import (
+from datamodels.api import IngestJobResponse
+from dependencies import unix_interval_parameters
+from pipelines.coincap_to_gcs import (
     ingest_asset_history,
     ingest_asset_info,
     ingest_exchange_info,
     ingest_market_history,
 )
-from batch_ingest.utils.tools import log_job_status
+from utils.tools import log_job_status
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI
 from fastapi.routing import APIRoute
