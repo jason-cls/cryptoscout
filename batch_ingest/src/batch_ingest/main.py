@@ -8,6 +8,9 @@ import time
 
 from datamodels.api import IngestJobResponse
 from dependencies import unix_interval_parameters
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI
+from fastapi.routing import APIRoute
 from pipelines.coincap_to_gcs import (
     ingest_asset_history,
     ingest_asset_info,
@@ -15,9 +18,6 @@ from pipelines.coincap_to_gcs import (
     ingest_market_history,
 )
 from utils.tools import log_job_status
-from dotenv import load_dotenv
-from fastapi import Depends, FastAPI
-from fastapi.routing import APIRoute
 
 # Setup
 file_dir = os.path.dirname(os.path.realpath(__file__))
