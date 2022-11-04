@@ -11,7 +11,7 @@ def unix_interval_parameters(
 ):
     if unix_start_ms >= unix_end_ms:
         raise HTTPException(
-            status_code=400,
+            status_code=422,
             detail=(
                 "Invalid time interval params: unix_start_ms must precede unix_end_ms"
             ),
