@@ -13,6 +13,11 @@ from batch_ingest.datamodels.coincap import (
 curdir = os.path.dirname(os.path.realpath(__file__))
 
 
+@pytest.fixture()
+def mock_time(mocker):
+    return mocker.patch("time.time", return_value=7357.592)
+
+
 @pytest.fixture(
     params=[
         ("asset_info_response.json", AssetInfoResponse),
