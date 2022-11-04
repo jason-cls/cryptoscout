@@ -53,3 +53,9 @@ resource "google_storage_bucket" "stage" {
   location      = var.region
   force_destroy = false
 }
+
+resource "google_storage_bucket" "temp" {
+  name          = local.temp_bucket
+  location      = var.region
+  force_destroy = true
+}

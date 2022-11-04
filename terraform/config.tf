@@ -14,6 +14,7 @@ locals {
   # GCS buckets
   raw_bucket   = "raw-${var.project}"
   stage_bucket = "stage-${var.project}"
+  temp_bucket  = "temp-${var.project}"
 
   # Project service account IAM roles
   service_acc_project_roles = {
