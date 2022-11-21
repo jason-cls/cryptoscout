@@ -12,5 +12,14 @@ local-container:
 		--name cryptoscout-batchingestor \
 		cryptoscout-batch-ingest-api
 
+docker-auth-config:
+	gcloud auth configure-docker us-central1-docker.pkg.dev
+
+docker-tag: docker-auth-config
+	docker tag cryptoscout-batch-ingest-api us-central1-docker.pkg.dev/cryptoscout/docker-repo/batch-ingest-api
+
+docker-push-artifactregistry: docker-tag
+	docker push us-central1-docker.pkg.dev/cryptoscout/docker-repo/batch-ingest-api
+
 test:
 	python -m pytest

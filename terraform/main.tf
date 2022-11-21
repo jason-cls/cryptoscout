@@ -22,7 +22,8 @@ provider "google" {
 resource "google_project_service" "api" {
   for_each = toset(local.gcp_apis)
 
-  service = each.value
+  service            = each.value
+  disable_on_destroy = false
 
   timeouts {
     create = "30m"
@@ -58,4 +59,11 @@ resource "google_storage_bucket" "temp" {
   name          = local.temp_bucket
   location      = var.region
   force_destroy = true
+}
+
+resource "google_artifact_registry_repository" "docker" {
+  repository_id = var.repository
+  format        = "DOCKER"
+  location      = var.region
+  description   = "Docker repository"
 }

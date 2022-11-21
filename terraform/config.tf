@@ -24,6 +24,8 @@ locals {
   # APIs to enable in GCP
   gcp_apis = [
     "iam.googleapis.com",
-    "storage.googleapis.com"
+    "storage.googleapis.com",
+    "artifactregistry.googleapis.com",
+    "run.googleapis.com"
   ]
 }

@@ -27,3 +27,15 @@ variable "batch_service_account_id" {
   type        = string
   default     = "batch-ingestor"
 }
+
+variable "repository" {
+  description = "The id of the Artifact Registry repository to create."
+  type        = string
+  default     = "docker-repo"
+}
+
+variable "batchingest_image" {
+  description = "The name of the Docker image in the Artifact Registry repository to be deployed on Cloud Run as a batch ingestion service."
+  type        = string
+  default     = "batch-ingest-api"
+}
