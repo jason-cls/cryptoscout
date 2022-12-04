@@ -18,7 +18,8 @@ locals {
 
   # Project service account IAM roles
   service_acc_project_roles = {
-    batch = ["roles/storage.objectAdmin"]
+    batch   = ["roles/storage.objectAdmin"]
+    airflow = ["roles/run.invoker"]
   }
 
   # APIs to enable in GCP
@@ -28,4 +29,8 @@ locals {
     "artifactregistry.googleapis.com",
     "run.googleapis.com"
   ]
+}
+
+data "local_sensitive_file" "coincap_key" {
+  filename = "${local.secrets_dir}/coincap-api-key.txt"
 }

@@ -22,6 +22,12 @@ variable "terraform_service_account_id" {
   default     = "terraform"
 }
 
+variable "airflow_service_account_id" {
+  description = "The id of the service account used by the Airflow instance."
+  type        = string
+  default     = "airflow"
+}
+
 variable "batch_service_account_id" {
   description = "The id of the service account used for batch ingestion."
   type        = string

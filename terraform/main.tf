@@ -67,3 +67,27 @@ resource "google_artifact_registry_repository" "docker" {
   location      = var.region
   description   = "Docker repository"
 }
+
+resource "google_cloud_run_service" "batch_ingest_api" {
+  name     = "cryptoscout-batchingestor"
+  location = var.region
+
+  template {
+    spec {
+      containers {
+        image = "${var.region}-docker.pkg.dev/${var.project}/${var.repository}/${var.batchingest_image}"
+        env {
+          name  = "COINCAP_API_KEY"
+          value = data.local_sensitive_file.coincap_key.content
+        }
+      }
+      container_concurrency = 0
+      timeout_seconds       = 1800
+      service_account_name  = google_service_account.batch.email
+    }
+  }
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}

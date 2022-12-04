@@ -12,3 +12,8 @@ output "artifact_registry_repository_id" {
   description = "ID of the repository in Artifact Registry."
   value       = google_artifact_registry_repository.docker.id
 }
+
+output "cloud_run_service_batchingestor_url" {
+  description = "URL of the batch ingest Cloud Run service."
+  value       = google_cloud_run_service.batch_ingest_api.status.0.url
+}
