@@ -1,5 +1,5 @@
 # Secrets
-*.env
+.env
 *-sa-key.json
 encryptionkey.gcs.tfbackend
 
