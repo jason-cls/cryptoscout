@@ -18,8 +18,9 @@ locals {
 
   # Project service account IAM roles
   service_acc_project_roles = {
-    batch   = ["roles/storage.objectAdmin"]
-    airflow = ["roles/run.invoker"]
+    batch    = ["roles/storage.objectAdmin"]
+    airflow  = ["roles/run.invoker"]
+    dataproc = ["roles/dataproc.worker"]
   }
 
   # APIs to enable in GCP
@@ -27,7 +28,8 @@ locals {
     "iam.googleapis.com",
     "storage.googleapis.com",
     "artifactregistry.googleapis.com",
-    "run.googleapis.com"
+    "run.googleapis.com",
+    "dataproc.googleapis.com"
   ]
 }
 

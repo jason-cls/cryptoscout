@@ -34,6 +34,12 @@ variable "batch_service_account_id" {
   default     = "batch-ingestor"
 }
 
+variable "dataproc_service_account_id" {
+  description = "The id of the service account used by dataproc VMs."
+  type        = string
+  default     = "dataproc"
+}
+
 variable "repository" {
   description = "The id of the Artifact Registry repository to create."
   type        = string
