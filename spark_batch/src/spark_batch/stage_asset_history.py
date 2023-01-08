@@ -1,8 +1,7 @@
 import logging
-import sys
 
-from pyspark import SparkConf, SparkContext
-from pyspark.sql import SparkSession
+from commons import init_argparser, init_spark, sparkconfig
+from pyspark import SparkConf
 from pyspark.sql import functions as F
 from pyspark.sql.types import (
     ArrayType,
@@ -14,26 +13,9 @@ from pyspark.sql.types import (
 )
 from pyspark.sql.utils import AnalysisException
 
-# SRC_DATE = sys.argv[1]
-# GCS_BKT_SOURCE = sys.argv[2]
-# GCS_BKT_STAGE = sys.argv[3]
-
-# APP_NAME = f"Stage Coincap Asset History: {SRC_DATE}"
 APP_NAME = "Stage Coincap Asset History"
 
-conf = (
-    SparkConf()
-    .setAppName(APP_NAME)
-    .set(
-        "spark.hadoop.fs.AbstractFileSystem.gs.impl",
-        "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
-    )
-    .set("spark.hadoop.fs.gs.auth.type", "APPLICATION_DEFAULT")
-    .set("spark.sql.session.timeZone", "UTC")
-)
-
-srcglob = "gs://raw-cryptoscout/coincap/asset_history/year=2022/month=01/day=01/*.json"
-writepath = "gs://stage-cryptoscout/coincap/asset_history"
+# Schema of source json files
 srcschema = StructType(
     [
         StructField(
@@ -54,14 +36,8 @@ srcschema = StructType(
 )
 
 
-def init_spark():
-    sparkcontext = SparkContext.getOrCreate(conf)
-    sparksession = SparkSession(sparkcontext)
-    return sparkcontext, sparksession
-
-
-def main():
-    sc, spark = init_spark()
+def main(conf: SparkConf, srcglob: str, writepath: str):
+    sc, spark = init_spark(conf)
 
     # Read json using schema - gracefully exit if no data found
     print(f"{APP_NAME} | Reading source data from {srcglob}")
@@ -94,7 +70,7 @@ def main():
     # Extract date
     df = df.withColumn("date", F.to_date("timestampUTC"))
 
-    # Reorder columns to write
+    # Reorder columns and sort rows
     df = df.select(
         "assetName",
         "date",
@@ -108,11 +84,21 @@ def main():
     # Write to filesystem
     print(f"{APP_NAME} | Writing data to {writepath}")
     df.write.partitionBy("assetName", "date").mode("overwrite").parquet(writepath)
-
-    df.show(20, truncate=False)
-    df.printSchema()
-    # spark.sparkContext.getConf().getAll()
+    print(
+        f"{APP_NAME} | Done staging data to {writepath} with"
+        f" schema:\n{df.schema.simpleString()}"
+    )
 
 
 if __name__ == "__main__":
-    main()
+    parser = init_argparser()
+    args = parser.parse_args()
+    DATE = args.srcdate.strftime("%Y-%m-%d")
+    YYYY, MM, DD = DATE.split("-")
+    srcglob = (
+        f"gs://{args.srcbucket}/coincap/asset_history/"
+        f"year={YYYY}/month={MM}/day={DD}/*.json"
+    )
+    writepath = f"gs://{args.stgbucket}/coincap/asset_history"
+    sparkconfig.setAppName(f"{APP_NAME}: {DATE}")
+    main(sparkconfig, srcglob, writepath)
