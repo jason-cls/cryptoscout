@@ -1,6 +1,6 @@
 import logging
 
-from commons import init_argparser, init_spark, sparkconfig
+from commons import expected_cols_check, init_argparser, init_spark, sparkconfig
 from pyspark import SparkConf
 from pyspark.sql import functions as F
 from pyspark.sql.types import (
@@ -35,17 +35,28 @@ srcschema = StructType(
         StructField("timestamp", TimestampType(), False),
     ]
 )
+srcdatafields_expect = {"circulatingSupply", "date", "priceUsd", "time"}
 
 
-def main(conf: SparkConf, srcglob: str, writepath: str):
+def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
     sc, spark = init_spark(conf)
 
     # Read json using schema - gracefully exit if no data found
-    print(f"{APP_NAME} | Reading source data from {srcglob}")
+    print(f"{appname} | Reading source data from {srcglob}")
     try:
         df = spark.read.option("mode", "FAILFAST").json(srcglob, schema=srcschema)
     except AnalysisException as e:
-        logging.warning(f"{APP_NAME} | Aborting PySpark job - no data read:\n {e}")
+        logging.warning(f"{appname} | Aborting PySpark job - no data read:\n {e}")
+        return
+
+    # Restructure nested json data as columns
+    df = df.select(F.explode("data").alias("dataExploded"), "timestamp").select(
+        "dataExploded.*", "timestamp"
+    )
+
+    # Check if all expected columns are present - gracefully exit if not
+    src_cols = set(df.columns)
+    if not expected_cols_check(srcdatafields_expect, src_cols, appname):
         return
 
     # Extract filename data
@@ -55,11 +66,6 @@ def main(conf: SparkConf, srcglob: str, writepath: str):
             F.input_file_name(), r"^.*asset_history_(\w+)_\d{8}\.json$", 1
         ),
     )
-
-    # Restructure nested json data as columns
-    df = df.select(
-        "assetName", F.explode("data").alias("dataExploded"), "timestamp"
-    ).select("assetName", "dataExploded.*", "timestamp")
 
     # Rename columns
     df = (
@@ -83,10 +89,10 @@ def main(conf: SparkConf, srcglob: str, writepath: str):
     ).sort("assetName", "timestampUTC")
 
     # Write to filesystem
-    print(f"{APP_NAME} | Writing data to {writepath}")
+    print(f"{appname} | Writing data to {writepath}")
     df.write.partitionBy("assetName", "date").mode("overwrite").parquet(writepath)
     print(
-        f"{APP_NAME} | Done staging data to {writepath} with"
+        f"{appname} | Done staging data to {writepath} with"
         f" schema:\n{df.schema.simpleString()}"
     )
 
@@ -101,5 +107,6 @@ if __name__ == "__main__":
         f"year={YYYY}/month={MM}/day={DD}/*.json"
     )
     writepath = f"gs://{args.stgbucket}/coincap/asset_history"
-    sparkconfig.setAppName(f"{APP_NAME}: {DATE}")
-    main(sparkconfig, srcglob, writepath)
+    appname_date = f"{APP_NAME}: {DATE}"
+    sparkconfig.setAppName(appname_date)
+    main(appname_date, sparkconfig, srcglob, writepath)

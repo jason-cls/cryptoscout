@@ -1,4 +1,5 @@
 import argparse
+import logging
 from datetime import datetime
 
 from pyspark import SparkConf, SparkContext
@@ -13,6 +14,20 @@ sparkconfig = (
     .set("spark.hadoop.fs.gs.auth.type", "APPLICATION_DEFAULT")
     .set("spark.sql.session.timeZone", "UTC")
 )
+
+
+def expected_cols_check(
+    cols_expect: set[str], cols_tocheck: set[str], appname: str
+) -> bool:
+    if not cols_expect.issubset(cols_tocheck):
+        missing_cols = cols_expect - cols_tocheck
+        logging.warning(
+            f"{appname} | Aborting PySpark job - columns {missing_cols} are missing"
+            f" from the read data columns {cols_tocheck}. Expected all columns in"
+            f" {cols_expect}."
+        )
+        return False
+    return True
 
 
 def init_argparser() -> argparse.ArgumentParser:
