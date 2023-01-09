@@ -25,11 +25,12 @@ srcschema = StructType(
                     [
                         StructField("circulatingSupply", DoubleType(), True),
                         StructField("date", TimestampType(), False),
-                        StructField("priceUsd", DoubleType(), False),
+                        StructField("priceUsd", DoubleType(), True),
                         StructField("time", LongType(), False),
                     ]
                 )
             ),
+            True,
         ),
         StructField("timestamp", TimestampType(), False),
     ]
@@ -42,7 +43,7 @@ def main(conf: SparkConf, srcglob: str, writepath: str):
     # Read json using schema - gracefully exit if no data found
     print(f"{APP_NAME} | Reading source data from {srcglob}")
     try:
-        df = spark.read.json(srcglob, schema=srcschema)
+        df = spark.read.option("mode", "FAILFAST").json(srcglob, schema=srcschema)
     except AnalysisException as e:
         logging.warning(f"{APP_NAME} | Aborting PySpark job - no data read:\n {e}")
         return
