@@ -44,9 +44,18 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
     # Read json using schema - gracefully exit if no data found
     print(f"{appname} | Reading source data from {srcglob}")
     try:
-        df = spark.read.option("mode", "FAILFAST").json(srcglob, schema=srcschema)
+        df = (
+            spark.read.option("mode", "FAILFAST")
+            .json(srcglob, schema=srcschema)
+            .cache()
+        )
+        df.show()  # Trigger lazy evaluation early to fail as soon as possible
     except AnalysisException as e:
         logging.warning(f"{appname} | Aborting PySpark job - no data read:\n {e}")
+        return
+
+    if df.count() == 0:
+        logging.warning(f"{appname} | Aborting PySpark job - no rows present")
         return
 
     # Restructure nested json data as columns
