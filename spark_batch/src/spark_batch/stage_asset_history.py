@@ -1,6 +1,14 @@
 import logging
 
-from commons import expected_cols_check, init_argparser, init_spark, sparkconfig
+from commons import (
+    check_expected_cols,
+    check_null_cols,
+    init_argparser,
+    init_spark,
+    read_json_strict,
+    sparkconfig,
+    write_parquet,
+)
 from pyspark import SparkConf
 from pyspark.sql import functions as F
 from pyspark.sql.types import (
@@ -42,12 +50,9 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
     sc, spark = init_spark(conf)
 
     # Read json using schema - gracefully exit if no data found
-    print(f"{appname} | Reading source data from {srcglob}")
     try:
-        df = spark.read.option("mode", "FAILFAST").json(srcglob, schema=srcschema)
-        df.show()  # Trigger lazy evaluation early to fail as soon as possible
-    except AnalysisException as e:
-        logging.warning(f"{appname} | Aborting PySpark job - no data read:\n {e}")
+        df = read_json_strict(srcglob, srcschema, spark, appname)
+    except (AnalysisException, AssertionError):
         return
 
     if df.count() == 0:
@@ -61,15 +66,19 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
 
     # Check if all expected columns are present - gracefully exit if not
     src_cols = set(df.columns)
-    if not expected_cols_check(srcdatafields_expect, src_cols, appname):
+    if not check_expected_cols(srcdatafields_expect, src_cols, appname):
         return
 
-    # Extract filename data
+    # Extract filename data - set to null if no match
     df = df.withColumn(
         "assetName",
         F.regexp_extract(
             F.input_file_name(), r"^.*asset_history_(\w+)_\d{8}\.json$", 1
         ),
+    )
+    df = df.withColumn(
+        "assetName",
+        F.when(F.col("assetName") != "", F.col("assetName")).otherwise(None),
     )
 
     # Rename columns
@@ -93,12 +102,18 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
         "timestampRequestUTC",
     ).sort("assetName", "timestampUTC")
 
+    # Check for null columns before writing - raises error
+    null_cols = check_null_cols(df)
+    if null_cols:
+        logging.error(
+            f"{appname} | Failed to stage dataframe. Columns "
+            f"{null_cols} are completely null"
+        )
+        raise RuntimeError
+
     # Write to filesystem
-    print(f"{appname} | Writing data to {writepath}")
-    df.write.partitionBy(["assetName", "date"]).mode("overwrite").parquet(writepath)
-    print(
-        f"{appname} | Done staging data to {writepath} with"
-        f" schema:\n{df.schema.simpleString()}"
+    write_parquet(
+        path=writepath, df=df, partition_cols=["assetName", "date"], appname=appname
     )
 
 
