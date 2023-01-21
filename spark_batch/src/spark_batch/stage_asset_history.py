@@ -44,11 +44,7 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
     # Read json using schema - gracefully exit if no data found
     print(f"{appname} | Reading source data from {srcglob}")
     try:
-        df = (
-            spark.read.option("mode", "FAILFAST")
-            .json(srcglob, schema=srcschema)
-            .cache()
-        )
+        df = spark.read.option("mode", "FAILFAST").json(srcglob, schema=srcschema)
         df.show()  # Trigger lazy evaluation early to fail as soon as possible
     except AnalysisException as e:
         logging.warning(f"{appname} | Aborting PySpark job - no data read:\n {e}")
@@ -99,7 +95,7 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
 
     # Write to filesystem
     print(f"{appname} | Writing data to {writepath}")
-    df.write.partitionBy("assetName", "date").mode("overwrite").parquet(writepath)
+    df.write.partitionBy(["assetName", "date"]).mode("overwrite").parquet(writepath)
     print(
         f"{appname} | Done staging data to {writepath} with"
         f" schema:\n{df.schema.simpleString()}"
