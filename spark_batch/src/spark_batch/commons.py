@@ -69,13 +69,12 @@ def read_json_strict(
     path: str, jsonschema: StructType, spark: SparkSession, appname: str
 ) -> DataFrame:
     """
-    Read json using a schema. Fails if upon schema mismatch.
+    Read json using a schema. Drops malformed records.
     Raises pyspark.sql.utils.AnalysisException if no data is read.
     """
     print(f"{appname} | Reading source data from {path}")
     try:
-        df = spark.read.option("mode", "FAILFAST").json(path, schema=jsonschema)
-        df.show()  # Trigger lazy evaluation early to fail as soon as possible
+        df = spark.read.option("mode", "DROPMALFORMED").json(path, schema=jsonschema)
         return df
     except AnalysisException as e:
         logging.warning(f"{appname} | Aborting PySpark job - no data read:\n {e}")
