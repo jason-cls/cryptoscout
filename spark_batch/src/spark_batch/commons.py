@@ -15,6 +15,7 @@ sparkconfig = (
         "com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS",
     )
     .set("spark.hadoop.fs.gs.auth.type", "APPLICATION_DEFAULT")
+    .set("spark.sql.sources.partitionOverwriteMode", "dynamic")
     .set("spark.sql.session.timeZone", "UTC")
 )
 
