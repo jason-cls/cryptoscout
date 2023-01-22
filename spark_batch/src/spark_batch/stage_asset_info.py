@@ -123,9 +123,6 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
         )
         raise RuntimeError
 
-    df.show(20, truncate=False)
-    df.printSchema()
-
     # Write to filesystem
     write_parquet(
         path=writepath, df=df, partition_cols=["assetName", "date"], appname=appname
