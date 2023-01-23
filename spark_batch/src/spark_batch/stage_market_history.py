@@ -44,7 +44,7 @@ srcschema = StructType(
         StructField("timestamp", TimestampType(), False),
     ]
 )
-srcdatafields_expect = {"close", "high", "low", "open", "period", "volume"}
+srcdatafields_expect = {"close", "high", "low", "open", "period", "volume", "timestamp"}
 
 
 def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
@@ -65,10 +65,9 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
         "dataExploded.*", "timestamp"
     )
 
-    # Check if all expected columns are present - gracefully exit if not
+    # Check if all expected columns are present - raises error otherwise
     src_cols = set(df.columns)
-    if not check_expected_cols(srcdatafields_expect, src_cols, appname):
-        return
+    check_expected_cols(srcdatafields_expect, src_cols, appname)
 
     # Extract filename data - set to null if no match
     regex = r"^.*market_history_(\w+)-(\w+)_\d{8}\.json$"
@@ -135,7 +134,7 @@ if __name__ == "__main__":
     DATE = args.srcdate.strftime("%Y-%m-%d")
     YYYY, MM, DD = DATE.split("-")
     srcglob = (
-        f"gs://{args.srcbucket}/coincap/asset_history/"
+        f"gs://{args.srcbucket}/coincap/market_history/"
         f"year={YYYY}/month={MM}/day={DD}/*.json"
     )
     writepath = f"gs://{args.stgbucket}/coincap/market_history"

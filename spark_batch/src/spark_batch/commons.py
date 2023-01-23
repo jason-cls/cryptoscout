@@ -20,19 +20,16 @@ sparkconfig = (
 )
 
 
-def check_expected_cols(
-    cols_expect: set[str], cols_tocheck: set[str], appname: str
-) -> bool:
-    """Returns True if cols_expect is a subset of cols_tocheck."""
+def check_expected_cols(cols_expect: set[str], cols_tocheck: set[str], appname: str):
+    """Raises a RuntimeError if cols_expect is not a subset of cols_tocheck."""
     if not cols_expect.issubset(cols_tocheck):
         missing_cols = cols_expect - cols_tocheck
-        logging.warning(
-            f"{appname} | Aborting PySpark job - columns {missing_cols} are missing"
+        logging.error(
+            f"{appname} | PySpark job error - columns {missing_cols} are missing"
             f" from the read data columns {cols_tocheck}. Expected all columns in"
             f" {cols_expect}."
         )
-        return False
-    return True
+        raise RuntimeError
 
 
 def check_null_cols(df: DataFrame) -> list[str]:

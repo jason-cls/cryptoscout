@@ -62,6 +62,7 @@ srcdatafields_expect = {
     "symbol",
     "volumeUsd24Hr",
     "vwap24Hr",
+    "timestamp",
 }
 
 
@@ -81,10 +82,9 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
     # Restructure nested json data as columns
     df = df.select("data.*", "timestamp")
 
-    # Check if all expected columns are present - gracefully exit if not
+    # Check if all expected columns are present - raises error otherwise
     src_cols = set(df.columns)
-    if not check_expected_cols(srcdatafields_expect, src_cols, appname):
-        return
+    check_expected_cols(srcdatafields_expect, src_cols, appname)
 
     # Rename columns
     df = (
