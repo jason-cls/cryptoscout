@@ -92,7 +92,7 @@ resource "google_service_account_iam_member" "batch_account_iam" {
 resource "google_service_account_iam_member" "dataproc_account_iam" {
   for_each = toset([
     var.terraform_service_account_id,
-    var.dataproc_service_account_id
+    var.airflow_service_account_id
   ])
 
   service_account_id = google_service_account.dataproc.name

@@ -61,6 +61,20 @@ resource "google_storage_bucket" "temp" {
   force_destroy = true
 }
 
+resource "google_storage_bucket" "dependencies" {
+  name          = local.deps_bucket
+  location      = var.region
+  force_destroy = false
+}
+
+resource "google_storage_bucket_object" "pyspark_deps" {
+  for_each = fileset("${path.root}/../spark_batch/src/spark_batch/", "*.py")
+
+  name   = "dependencies/spark_batch/${each.value}"
+  bucket = google_storage_bucket.dependencies.name
+  source = "${path.root}/../spark_batch/src/spark_batch/${each.value}"
+}
+
 resource "google_artifact_registry_repository" "docker" {
   repository_id = var.repository
   format        = "DOCKER"

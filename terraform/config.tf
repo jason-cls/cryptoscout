@@ -15,11 +15,16 @@ locals {
   raw_bucket   = "raw-${var.project}"
   stage_bucket = "stage-${var.project}"
   temp_bucket  = "temp-${var.project}"
+  deps_bucket  = "deps-${var.project}"
 
   # Project service account IAM roles
   service_acc_project_roles = {
-    batch    = ["roles/storage.objectAdmin"]
-    airflow  = ["roles/run.invoker"]
+    batch = ["roles/storage.objectAdmin"]
+    airflow = [
+      "roles/storage.objectViewer",
+      "roles/run.invoker",
+      "roles/dataproc.editor"
+    ]
     dataproc = ["roles/dataproc.worker"]
   }
 
@@ -28,6 +33,7 @@ locals {
     "iam.googleapis.com",
     "storage.googleapis.com",
     "artifactregistry.googleapis.com",
+    "compute.googleapis.com",
     "run.googleapis.com",
     "dataproc.googleapis.com"
   ]
