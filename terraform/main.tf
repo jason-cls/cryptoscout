@@ -105,3 +105,33 @@ resource "google_cloud_run_service" "batch_ingest_api" {
     latest_revision = true
   }
 }
+
+resource "google_bigquery_dataset" "datawarehouse" {
+  dataset_id  = "dwh"
+  description = "Data warehouse for analytics - OLAP dimensional model"
+  location    = var.region
+}
+
+resource "google_bigquery_dataset" "coincap" {
+  dataset_id  = "stage_coincap"
+  description = "Staging area for coincap API data"
+  location    = google_storage_bucket.stage.location
+}
+
+resource "google_bigquery_table" "coincap_external_tbl" {
+  for_each = toset(local.coincap_ext_tbls)
+
+  table_id   = each.value
+  dataset_id = google_bigquery_dataset.coincap.dataset_id
+
+  external_data_configuration {
+    autodetect    = true
+    source_format = "PARQUET"
+    source_uris   = ["${google_storage_bucket.stage.url}/coincap/${each.value}/*.parquet"]
+
+    hive_partitioning_options {
+      mode              = "AUTO"
+      source_uri_prefix = "${google_storage_bucket.stage.url}/coincap/${each.value}/"
+    }
+  }
+}

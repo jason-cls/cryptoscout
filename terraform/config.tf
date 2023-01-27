@@ -17,6 +17,9 @@ locals {
   temp_bucket  = "temp-${var.project}"
   deps_bucket  = "deps-${var.project}"
 
+  # External table names in BigQuery
+  coincap_ext_tbls = ["asset_history", "asset_info", "exchange_info", "market_history"]
+
   # Project service account IAM roles
   service_acc_project_roles = {
     batch = ["roles/storage.objectAdmin"]
@@ -35,7 +38,8 @@ locals {
     "artifactregistry.googleapis.com",
     "compute.googleapis.com",
     "run.googleapis.com",
-    "dataproc.googleapis.com"
+    "dataproc.googleapis.com",
+    "bigquery.googleapis.com"
   ]
 }
 
