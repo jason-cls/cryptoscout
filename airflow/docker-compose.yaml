@@ -61,9 +61,12 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
-    # Application Default Credentials
+    # Forwarded host environment variables (set in .env and req.env)
+    AIRFLOW_UID: ${AIRFLOW_UID:-50000}
+    CLOUD_RUN_BATCHINGEST_URL: ${CLOUD_RUN_BATCHINGEST_URL:-}
+    # Application Default Credentials (ADC)
     AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://'
-    # Conditionally set GOOGLE_APPLICATION_CREDENTIALS variable with config-adc.sh instead
+    # Conditionally set GOOGLE_APPLICATION_CREDENTIALS variable with config-adc.sh instead due to ADC detection order
     # GOOGLE_APPLICATION_CREDENTIALS: /opt/airflow/.secrets/airflow-sa-key.json
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
