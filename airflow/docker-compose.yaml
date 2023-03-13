@@ -63,7 +63,7 @@ x-airflow-common:
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
     # Forwarded host environment variables (set in .env and req.env)
     AIRFLOW_UID: ${AIRFLOW_UID:-50000}
-    AIRFLOW_VAR_CLOUD_RUN_BATCHINGEST_URL: ${CLOUD_RUN_BATCHINGEST_URL:-}
+    AIRFLOW_VAR_CLOUD_RUN_BATCHINGEST_URL: ${CLOUD_RUN_BATCHINGEST_URL:?REQUIRED}
     # Application Default Credentials (ADC)
     AIRFLOW_CONN_GOOGLE_CLOUD_DEFAULT: 'google-cloud-platform://'
     # Conditionally set GOOGLE_APPLICATION_CREDENTIALS variable with config-adc.sh instead due to ADC detection order

@@ -3,19 +3,17 @@ AIRFLOW_UID := $(shell id -u)
 airflow-init:
 	@echo "Initializing Airflow..."
 	echo "AIRFLOW_UID=$(AIRFLOW_UID)" > .env
-	set -a && . ./.env && set +a
+	set -a && . ./.env && . ./req.env && set +a && \
 	docker compose up --build airflow-init
 
 up:
 	@echo "Starting Airflow in detached mode..."
-	set -a && \
-	. ./.env && \
-	. ./req.env && \
-	set +a && \
+	set -a && . ./.env && . ./req.env && set +a && \
 	docker compose up -d --build
 
 down:
 	@echo "Stopping Airflow..."
+	set -a && . ./.env && . ./req.env && set +a && \
 	docker compose down --remove-orphans
 
 dev-env:
