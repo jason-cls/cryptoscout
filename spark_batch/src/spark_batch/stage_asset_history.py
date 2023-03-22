@@ -64,6 +64,11 @@ def main(appname: str, conf: SparkConf, srcglob: str, writepath: str):
         "dataExploded.*", "timestamp"
     )
 
+    # Check if there are no rows after exploding data - indicates empty data array
+    if df.count() == 0:
+        logging.warning(f"{appname} | Aborting PySpark job - empty data array")
+        return
+
     # Check if all expected columns are present - raises error otherwise
     src_cols = set(df.columns)
     check_expected_cols(srcdatafields_expect, src_cols, appname)
