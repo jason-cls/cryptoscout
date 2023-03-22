@@ -75,21 +75,21 @@ resource "google_project_iam_member" "dataproc" {
   member  = "serviceAccount:${google_service_account.dataproc.email}"
 }
 
-resource "google_service_account_iam_member" "airflow_account_iam" {
+resource "google_service_account_iam_member" "airflow_account_user" {
   service_account_id = google_service_account.airflow.name
 
   role   = "roles/iam.serviceAccountUser"
   member = "serviceAccount:${var.terraform_service_account_id}@${var.project}.iam.gserviceaccount.com"
 }
 
-resource "google_service_account_iam_member" "batch_account_iam" {
+resource "google_service_account_iam_member" "batch_account_user" {
   service_account_id = google_service_account.batch.name
 
   role   = "roles/iam.serviceAccountUser"
   member = "serviceAccount:${var.terraform_service_account_id}@${var.project}.iam.gserviceaccount.com"
 }
 
-resource "google_service_account_iam_member" "dataproc_account_iam" {
+resource "google_service_account_iam_member" "dataproc_account_user" {
   for_each = toset([
     var.terraform_service_account_id,
     var.airflow_service_account_id
@@ -99,4 +99,11 @@ resource "google_service_account_iam_member" "dataproc_account_iam" {
 
   role   = "roles/iam.serviceAccountUser"
   member = "serviceAccount:${each.key}@${var.project}.iam.gserviceaccount.com"
+}
+
+resource "google_service_account_iam_member" "dataproc_account_tokencreator" {
+  service_account_id = google_service_account.dataproc.name
+
+  role   = "roles/iam.serviceAccountTokenCreator"
+  member = "serviceAccount:${var.airflow_service_account_id}@${var.project}.iam.gserviceaccount.com"
 }
