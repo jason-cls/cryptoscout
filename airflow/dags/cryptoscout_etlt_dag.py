@@ -5,39 +5,16 @@ from airflow.decorators import task
 from airflow.models import Variable
 from airflow.operators.bash import BashOperator
 from airflow.operators.latest_only import LatestOnlyOperator
-from airflow.providers.google.cloud.operators.dataproc import (
-    DataprocCreateBatchOperator,
-)
-from airflow.providers.google.cloud.sensors.gcs import (
-    GCSObjectsWithPrefixExistenceSensor,
-)
-from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.utils.log.secrets_masker import mask_secret
+from parameters import historical_task_params
+from task_templates import (
+    check_coincap_ingest_objects,
+    ingest_coincap_data,
+    stage_coincap_data,
+)
 
 from airflow import DAG
 
-GCP_PROJECT_ID = "{{ var.value.GCP_PROJECT_ID }}"
-GCS_RAW_BUCKET = "{{ var.value.GCS_RAW_BUCKET }}"
-GCS_STAGE_BUCKET = "{{ var.value.GCS_STAGE_BUCKET }}"
-GCS_DEPS_BUCKET = "{{ var.value.GCS_DEPS_BUCKET }}"
-DATAPROC_REGION = "{{ var.value.DATAPROC_REGION }}"
-DATAPROC_SERVICEACCOUNT = "{{ var.value.DATAPROC_SERVICEACCOUNT }}"
-DATAPROC_SUBNET_URI = "{{ var.value.DATAPROC_SUBNET_URI }}"
-
-historical_task_params = {
-    "asset_history": {
-        "ingest_endpoint": "ingestAssetHistory",
-        "dataproc_main_python_file_uri": (
-            f"gs://{GCS_DEPS_BUCKET}/dependencies/spark_batch/stage_asset_history.py"
-        ),
-    },
-    "market_history": {
-        "ingest_endpoint": "ingestMarketHistory",
-        "dataproc_main_python_file_uri": (
-            f"gs://{GCS_DEPS_BUCKET}/dependencies/spark_batch/stage_market_history.py"
-        ),
-    },
-}
 
 default_operator_args = {
     "owner": "airflow",
@@ -52,7 +29,7 @@ with DAG(
     start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
     end_date=pendulum.datetime(2022, 1, 2, tz="UTC"),
     default_args=default_operator_args,
-    max_active_tasks=4,
+    max_active_tasks=8,
     max_active_runs=2,
     catchup=True,
 ) as dag:
@@ -81,57 +58,19 @@ with DAG(
     )
 
     for name, param in historical_task_params.items():
-        ingest_historical = SimpleHttpOperator(
-            task_id=f"ingest_{name}",
-            http_conn_id="CLOUD_RUN_BATCHINGEST",
+        ingest_historical = ingest_coincap_data(
+            data_name=name,
             endpoint=param["ingest_endpoint"],
-            method="GET",
-            data={
-                "unix_start_ms": "{{ data_interval_start.format('x') }}",
-                "unix_end_ms": "{{ data_interval_end.format('x') }}",
-            },
-            headers={"Authorization": "Bearer " + id_token},
-            response_check=lambda response: bool(response.json()["success"]),
-            log_response=True,
+            http_auth_bearer_token=id_token,
         )
 
-        ingest_gcs_objects_exist_historical = GCSObjectsWithPrefixExistenceSensor(
-            task_id=f"ingest_gcs_objects_exist_{name}",
-            bucket=GCS_RAW_BUCKET,
-            prefix=(
-                "{{ data_interval_start.format"
-                f"('[coincap/{name}/year=]YYYY[/month=]MM[/day=]DD')"
-                " }}"
-            ),
-            poke_interval=5.0,
-            timeout=30.0,
+        ingest_gcs_objects_exist_historical = check_coincap_ingest_objects(
+            data_name=name
         )
 
-        stage_gcs_historical = DataprocCreateBatchOperator(
-            task_id=f"stage_{name}",
-            project_id=GCP_PROJECT_ID,
-            region=DATAPROC_REGION,
-            batch={
-                "pyspark_batch": {
-                    "main_python_file_uri": param["dataproc_main_python_file_uri"],
-                    "args": ["{{ ds }}", GCS_RAW_BUCKET, GCS_STAGE_BUCKET],
-                    "python_file_uris": [
-                        f"gs://{GCS_DEPS_BUCKET}/dependencies/spark_batch/commons.py"
-                    ],
-                },
-                "runtime_config": {"version": "2.0"},
-                "environment_config": {
-                    "execution_config": {
-                        "service_account": DATAPROC_SERVICEACCOUNT,
-                        "subnetwork_uri": DATAPROC_SUBNET_URI,
-                    }
-                },
-            },
-            batch_id=f"stage-{name}".replace("_", "-")
-            + "-{{ ds_nodash }}-{{ macros.time.time() | int }}",
-            # impersonation_chain=DATAPROC_SERVICEACCOUNT,
-            depends_on_past=True,
-            wait_for_downstream=True,
+        stage_gcs_historical = stage_coincap_data(
+            data_name=name,
+            pyspark_main_python_file_uri=param["dataproc_main_python_file_uri"],
         )
 
         (
