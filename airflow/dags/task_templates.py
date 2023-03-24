@@ -34,14 +34,15 @@ def ingest_coincap_data(
     )
 
 
-def check_coincap_ingest_objects(data_name: str) -> GCSObjectsWithPrefixExistenceSensor:
+def check_coincap_ingest_objects(
+    data_name: str, datetime_template: str
+) -> GCSObjectsWithPrefixExistenceSensor:
     return GCSObjectsWithPrefixExistenceSensor(
         task_id=f"ingest_gcs_objects_exist_{data_name}",
         bucket=GCS_RAW_BUCKET,
         prefix=(
-            "{{ data_interval_start.format"
-            f"('[coincap/{data_name}/year=]YYYY[/month=]MM[/day=]DD')"
-            " }}"
+            f"{{{{ {datetime_template}.format"
+            f"('[coincap/{data_name}/year=]YYYY[/month=]MM[/day=]DD') }}}}"
         ),
         poke_interval=5.0,
         timeout=30.0,
@@ -49,7 +50,7 @@ def check_coincap_ingest_objects(data_name: str) -> GCSObjectsWithPrefixExistenc
 
 
 def stage_coincap_data(
-    data_name: str, pyspark_main_python_file_uri: str
+    data_name: str, datetime_template: str, pyspark_main_python_file_uri: str
 ) -> DataprocCreateBatchOperator:
     return DataprocCreateBatchOperator(
         task_id=f"stage_{data_name}",
@@ -58,7 +59,11 @@ def stage_coincap_data(
         batch={
             "pyspark_batch": {
                 "main_python_file_uri": pyspark_main_python_file_uri,
-                "args": ["{{ ds }}", GCS_RAW_BUCKET, GCS_STAGE_BUCKET],
+                "args": [
+                    f"{{{{ {datetime_template} | ds }}}}",
+                    GCS_RAW_BUCKET,
+                    GCS_STAGE_BUCKET,
+                ],
                 "python_file_uris": [
                     f"gs://{GCS_DEPS_BUCKET}/dependencies/spark_batch/commons.py"
                 ],
@@ -72,7 +77,8 @@ def stage_coincap_data(
             },
         },
         batch_id=f"stage-{data_name}".replace("_", "-")
-        + "-{{ ds_nodash }}-{{ macros.time.time() | int }}",
+        + f"-{{{{ {datetime_template} | ds_nodash }}}}"
+        + "-{{ macros.time.time() | int }}",
         depends_on_past=True,
         wait_for_downstream=True,
     )

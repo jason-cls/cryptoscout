@@ -21,3 +21,19 @@ historical_task_params = {
         ),
     },
 }
+
+# Snapshot data
+snapshot_task_params = {
+    "asset_info": {
+        "ingest_endpoint": "ingestAssetInfo",
+        "dataproc_main_python_file_uri": (
+            f"gs://{GCS_DEPS_BUCKET}/dependencies/spark_batch/stage_asset_info.py"
+        ),
+    },
+    "exchange_info": {
+        "ingest_endpoint": "ingestExchangeInfo",
+        "dataproc_main_python_file_uri": (
+            f"gs://{GCS_DEPS_BUCKET}/dependencies/spark_batch/stage_exchange_info.py"
+        ),
+    },
+}

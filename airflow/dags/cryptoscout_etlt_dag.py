@@ -6,7 +6,7 @@ from airflow.models import Variable
 from airflow.operators.bash import BashOperator
 from airflow.operators.latest_only import LatestOnlyOperator
 from airflow.utils.log.secrets_masker import mask_secret
-from parameters import historical_task_params
+from parameters import historical_task_params, snapshot_task_params
 from task_templates import (
     check_coincap_ingest_objects,
     ingest_coincap_data,
@@ -14,7 +14,6 @@ from task_templates import (
 )
 
 from airflow import DAG
-
 
 default_operator_args = {
     "owner": "airflow",
@@ -50,6 +49,8 @@ with DAG(
     id_token = "{{ ti.xcom_pull(task_ids='get_gauth_id_token') }}"
     get_auth_token = get_gauth_id_token("CLOUD_RUN_BATCHINGEST_URL")
 
+    latest_only = LatestOnlyOperator(task_id="latest_only")
+
     execute_dbt = BashOperator(
         task_id="dbt_run",
         bash_command="echo cmd_placeholder",
@@ -65,11 +66,12 @@ with DAG(
         )
 
         ingest_gcs_objects_exist_historical = check_coincap_ingest_objects(
-            data_name=name
+            data_name=name, datetime_template="data_interval_start"
         )
 
         stage_gcs_historical = stage_coincap_data(
             data_name=name,
+            datetime_template="data_interval_start",
             pyspark_main_python_file_uri=param["dataproc_main_python_file_uri"],
         )
 
@@ -81,4 +83,28 @@ with DAG(
             >> execute_dbt
         )  # type: ignore
 
-    latest_only = LatestOnlyOperator(task_id="latest_only")
+    # Data is snapshotted on the logical date of the next scheduled run (trigger time)
+    for name, param in snapshot_task_params.items():
+        ingest_snapshot = ingest_coincap_data(
+            data_name=name,
+            endpoint=param["ingest_endpoint"],
+            http_auth_bearer_token=id_token,
+        )
+
+        ingest_gcs_objects_exist_snapshot = check_coincap_ingest_objects(
+            data_name=name, datetime_template="data_interval_end"
+        )
+
+        stage_gcs_snapshot = stage_coincap_data(
+            data_name=name,
+            datetime_template="data_interval_end",
+            pyspark_main_python_file_uri=param["dataproc_main_python_file_uri"],
+        )
+
+        (
+            [latest_only, get_auth_token]
+            >> ingest_snapshot
+            >> ingest_gcs_objects_exist_snapshot
+            >> stage_gcs_snapshot
+            >> execute_dbt
+        )  # type: ignore
