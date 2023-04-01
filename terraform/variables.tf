@@ -40,6 +40,12 @@ variable "dataproc_service_account_id" {
   default     = "dataproc"
 }
 
+variable "dbt_service_account_id" {
+  description = "The id of the service account used by the dbt worker."
+  type        = string
+  default     = "dbt-runner"
+}
+
 variable "repository" {
   description = "The id of the Artifact Registry repository to create."
   type        = string

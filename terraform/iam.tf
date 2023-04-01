@@ -17,6 +17,12 @@ resource "google_service_account" "dataproc" {
   description  = "Associated with VMs which run Dataproc workloads"
 }
 
+resource "google_service_account" "dbt" {
+  account_id   = var.dbt_service_account_id
+  display_name = "dbt Runner"
+  description  = "Applies data transformations within BigQuery"
+}
+
 
 # -- PRIVATE KEYS --
 resource "google_service_account_key" "airflow" {
@@ -29,6 +35,10 @@ resource "google_service_account_key" "batch" {
 
 resource "google_service_account_key" "dataproc" {
   service_account_id = google_service_account.dataproc.id
+}
+
+resource "google_service_account_key" "dbt" {
+  service_account_id = google_service_account.dbt.id
 }
 
 resource "local_sensitive_file" "airflow_service_account_key" {
@@ -46,6 +56,12 @@ resource "local_sensitive_file" "batch_service_account_key" {
 resource "local_sensitive_file" "dataproc_service_account_key" {
   filename        = "${local.secrets_dir}/dataproc-sa-key.json"
   content         = base64decode(google_service_account_key.dataproc.private_key)
+  file_permission = "0444"
+}
+
+resource "local_sensitive_file" "dbt_service_account_key" {
+  filename        = "${local.secrets_dir}/dbt-sa-key.json"
+  content         = base64decode(google_service_account_key.dbt.private_key)
   file_permission = "0444"
 }
 
@@ -73,6 +89,14 @@ resource "google_project_iam_member" "dataproc" {
   project = var.project
   role    = each.value
   member  = "serviceAccount:${google_service_account.dataproc.email}"
+}
+
+resource "google_project_iam_member" "dbt" {
+  for_each = toset(local.service_acc_project_roles.dbt)
+
+  project = var.project
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.dbt.email}"
 }
 
 resource "google_service_account_iam_member" "airflow_account_user" {

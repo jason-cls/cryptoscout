@@ -29,6 +29,10 @@ locals {
       "roles/dataproc.editor"
     ]
     dataproc = ["roles/dataproc.worker"]
+    dbt = [
+      "roles/bigquery.dataEditor",
+      "roles/bigquery.user"
+    ]
   }
 
   # APIs to enable in GCP
