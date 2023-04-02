@@ -1,0 +1,27 @@
+cryptoscout:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('GCP_PROJECT_ID', 'cryptoscout') }}"
+      location: "{{ env_var('BQ_DATASET_LOCATION', 'us-central1') }}"
+      dataset: "{{ env_var('BQ_DATASET', 'dbt_dev_dwh') }}"
+      threads: 4
+      keyfile: ./.secrets/dbt-sa-key.json
+      priority: interactive
+      job_creation_timeout_seconds: 60
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+    prod:
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('GCP_PROJECT_ID', 'cryptoscout') }}"
+      location: "{{ env_var('GCP_DATASET_LOCATION', 'us-central1') }}"
+      dataset: "{{ env_var('BQ_DATASET', 'dwh') }}"
+      threads: 4
+      keyfile: ./.secrets/dbt-sa-key.json
+      priority: interactive
+      job_creation_timeout_seconds: 60
+      job_execution_timeout_seconds: 300
+      job_retries: 1
