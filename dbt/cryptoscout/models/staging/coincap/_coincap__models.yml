@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: stg_coincap__asset_history
+    description: Staged historical asset data from the Coincap API.
+
+  - name: stg_coincap__asset_info
+    description: Staged point-in-time asset data from the Coincap API.
+
+  - name: stg_coincap__exchange_info
+    description: Staged point-in-time exchange data from the Coincap API.
+    
+  - name: stg_coincap__market_history
+    description: Staged historical market data from the Coincap API.

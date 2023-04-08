@@ -1,0 +1,107 @@
+version: 2
+
+sources:
+  - name: coincap
+    description: >
+      Coincap API response data staged in BigQuery as GCS external tables 
+      in Parquet format.
+    database: "{{ env_var('GCP_PROJECT_ID', 'cryptoscout') }}"
+    schema: stage_coincap
+    tables:
+      - name: asset_history
+        columns:
+          - name: assetName
+            description: Unique identifier for the cryptocurrency asset.
+          - name: date
+            description: Date corresponding to the data's UTC timestamp.
+          - name: timestampUTC
+            description: UTC timestamp corresponding to the data.
+          - name: timestampUnixMs
+            description: Unix timestamp in milliseconds corresponding to the data.
+          - name: circulatingSupply
+            description: The asset's circulating supply.
+          - name: priceUsd
+            description: Volume-weighted price of the asset in US Dollars.
+          - name: timestampRequestUTC
+            description: UTC timestamp associated with when the API request was issued.
+
+      - name: asset_info
+        columns:
+          - name: assetName
+            description: Unique identifier for the cryptocurrency asset.
+          - name: date
+            description: Date corresponding to the data's UTC timestamp.
+          - name: timestampUTC
+            description: UTC timestamp corresponding to the data.
+          - name: rank
+            description: Rank of the asset in terms of market cap.
+          - name: symbol
+            description: Symbol used to identify the asset on an exchange.
+          - name: fullAssetName
+            description: Proper name of the asset.
+          - name: supply
+            description: Available supply for trading.
+          - name: maxSupply
+            description: Total quantity of asset issued.
+          - name: marketCapUsd
+            description: Market capitalization in US Dollars.
+          - name: volumeUsd24Hr
+            description: Trading volume represented in USD over the last 24 hours.
+          - name: priceUsd
+            description: Volume-weighted price of the asset in US Dollars.
+          - name: changePercent24Hr
+            description: Price value change in the last 24 hours.
+          - name: vwap24Hr
+            description: Volume Weighted Average Price in the last 24 hours.
+          - name: explorer
+            description: Website URL of the explorer.
+
+      - name: exchange_info
+        columns:
+          - name: exchangeName
+            description: Unique identifier for the exchange.
+          - name: date
+            description: Date corresponding to the data's UTC timestamp.
+          - name: timestampUTC
+            description: UTC timestamp corresponding to the data.
+          - name: fullExchangeName
+            description: Proper name of the exchange.
+          - name: rank
+            description: Rank of the exchange in terms of total exchange volume.
+          - name: percentTotalVolume
+            description: >
+              The amount of daily volume a single exchange transacts in relation to the
+              total daily volume of all exchanges.
+          - name: volumeUsd
+            description: Daily volume represented in USD.
+          - name: tradingPairs
+            description: Number of trading pairs / markets offered by exchange
+          - name: socket
+            description: Boolean indicating trade socket availability.
+          - name: exchangeUrl
+            description: Website URL to exchange.
+          - name: timestampRequestUTC
+            description: UTC timestamp associated with when the API request was issued.
+
+      - name: market_history
+        columns:
+          - name: exchangeName
+            description: Unique identifier for the exchange.
+          - name: assetName
+            description: Unique identifier for the base asset id.
+          - name: date
+            description: Date corresponding to the data's UTC timestamp.
+          - name: timestampUTC
+            description: UTC timestamp corresponding to the start of the data period.
+          - name: open
+            description: The price (quote - tether) at which the first transaction was completed in a given time period.
+          - name: high
+            description: The top price (quote - tether) at which the base was traded during the time period.
+          - name: low
+            description: The bottom price (quote - tether) at which the base was traded during the time period.
+          - name: close
+            description: The price (quote - tether) at which the last transaction was completed in a given time period.
+          - name: volume
+            description: The amount of base asset traded in the given time period
+          - name: timestampRequestUTC
+            description: UTC timestamp associated with when the API request was issued.
