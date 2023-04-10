@@ -26,8 +26,12 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   cryptoscout:
-    example:
-      +materialized: view
     staging:
       +schema: staging
+      +materialized: view
+    utilities:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
       +materialized: view
