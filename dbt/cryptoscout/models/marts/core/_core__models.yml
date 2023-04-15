@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: Date dimension encompassing each day from 2022-01-01 to the end of the current year.
+    columns:
+      - name: date_id
+        description: (INTEGER) Date identifier represented in YYYYMMDD format.
+        tests:
+          - not_null
+          - unique
+      - name: datestamp
+        description: (DATE) Date object representation of the date.
+        tests:
+          - not_null
+          - unique
+      - name: year
+        description: (INTEGER) Year corresponding to the date.
+        tests:
+          - not_null
+      - name: month
+        description: (INTEGER) Month corresponding to the date (1-12).
+        tests:
+          - not_null
+      - name: day_of_month
+        description: (INTEGER) Day of month corresponding to the date (1-31).
+        tests:
+          - not_null
+      - name: day_of_week
+        description: (STRING) Full weekday name.
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+      - name: is_weekend
+        description: (BOOLEAN) Flag indicating if the date is a weekend.
+        tests:
+          - not_null
+      - name: week_of_year
+        description: (INTEGER) Week number of the date in the range [0, 53]. Weeks begin with Sunday, and dates prior to the first Sunday of the year are in week 0.
+        tests:
+          - not_null
+      - name: calendar_quarter
+        description: (INTEGER) The calendar quarter as a number (1-4).
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4]
+              quote: false
+      - name: year_quarter
+        description: (STRING) Concatenated year and calendar quarter (E.g. 2022-Q4).
+        tests:
+          - not_null
+      - name: year_month
+        description: (STRING) Concatenated year and abbreviated month name (E.g. 2022-Jan).
+        tests:
+          - not_null
