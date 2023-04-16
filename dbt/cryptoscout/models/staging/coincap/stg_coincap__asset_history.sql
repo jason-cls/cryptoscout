@@ -10,7 +10,8 @@ asset_history AS (
         date,
         timestamputc AS timestamp_utc,
         priceusd AS price_usd,
-        circulatingsupply AS supply
+        circulatingsupply AS supply,
+        timestamprequestutc AS timestamp_request_utc
     FROM source
 )
 

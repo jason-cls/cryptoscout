@@ -14,7 +14,8 @@ market_history AS (
         high,
         low,
         close,
-        volume
+        volume,
+        timestamprequestutc AS timestamp_request_utc
     FROM source
 )
 

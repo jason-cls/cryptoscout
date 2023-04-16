@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: int_asset_history_deduplicated
+    description: Deduplicates asset history data to retain only most recent data returned by the API for duplicate rows.
+  - name: int_asset_history_regrained_hourly
+    description: Regrains asset history data to enforce an hourly grain.
+  - name: int_market_history_deduplicated
+    description: Deduplicates market history data to retain only most recent data returned by the API for duplicate rows.
+  - name: int_market_history_regrained_hourly
+    description: Regrains market history data to enforce an hourly grain.
