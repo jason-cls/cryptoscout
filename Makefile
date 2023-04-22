@@ -9,13 +9,13 @@ install-pipx:
 format:
 	isort .
 	black -l 88 --preview .
-	sqlfluff fix ./dbt/ --dialect=bigquery --force
+	sqlfluff fix ./dbt/ --dialect=bigquery --ignore=templating --force
 
 type:
 	mypy --ignore-missing-imports .
 
 lint:
 	flake8 .
-	sqlfluff lint ./dbt/ --dialect=bigquery
+	sqlfluff lint ./dbt/ --dialect=bigquery --ignore=templating
 
 ci:	format type lint
