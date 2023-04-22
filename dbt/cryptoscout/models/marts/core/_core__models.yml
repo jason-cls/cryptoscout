@@ -1,6 +1,15 @@
 version: 2
 
 models:
+  - name: fct_asset_history
+    description: Fact table containing asset data at an hourly grain.
+
+  - name: fct_asset_dailystats
+    description: Fact table containing daily point-in-time asset data.
+
+  - name: dim_assets
+    description: Dimension table describing crypocurrency asset attributes (SCD2).
+    
   - name: dim_date
     description: Date dimension encompassing each day from 2022-01-01 to the end of the current year.
     columns:
