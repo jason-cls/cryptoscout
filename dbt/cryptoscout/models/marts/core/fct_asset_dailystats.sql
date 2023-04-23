@@ -15,7 +15,7 @@ asset_info_base AS (
         available_supply,
         volume_usd_24hr,
         volume_weighted_avg_price_24hr,
-        ROW_NUMBER() OVER (ORDER BY timestamp_utc, asset_id) AS timepoint_id,
+        ROW_NUMBER() OVER (ORDER BY timestamp_utc, asset_id) AS dailystat_id,
         CAST(FORMAT_TIMESTAMP('%Y%m%d', timestamp_utc) AS INT64) AS date_id
     FROM asset_info_regrained
     ORDER BY timestamp_utc, asset_id
@@ -23,7 +23,7 @@ asset_info_base AS (
 
 fct_asset_dailystats AS (
     SELECT
-        asset_info_base.timepoint_id,
+        asset_info_base.dailystat_id,
         asset_info_base.date_id,
         dim_assets.asset_key,
         asset_info_base.timestamp_utc,
@@ -37,7 +37,7 @@ fct_asset_dailystats AS (
             AND asset_info_base.timestamp_utc
             BETWEEN dim_assets.row_effective_time
             AND dim_assets.row_expiration_time
-    ORDER BY asset_info_base.timepoint_id
+    ORDER BY asset_info_base.dailystat_id
 )
 
 SELECT * FROM fct_asset_dailystats
