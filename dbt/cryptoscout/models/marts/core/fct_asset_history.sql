@@ -4,6 +4,10 @@ asset_history_regrained AS (
     SELECT * FROM {{ ref('int_asset_history_regrained_hourly') }}
 ),
 
+dim_assets AS (
+    SELECT * FROM {{ ref('dim_assets') }}
+),
+
 asset_prices AS (
     SELECT
         timestamp_utc,
@@ -31,10 +35,9 @@ asset_base AS (
 fct_asset_history AS (
     SELECT
         asset_base.timepoint_id,
-        asset_base.timestamp_utc,
         asset_base.date_id,
-        asset_base.asset_id, -- replace later with asset_key
-        -- asset_key (surrogate integer asset_key joined from dim_assets)
+        dim_assets.asset_key,
+        asset_base.timestamp_utc,
         asset_base.price_usd,
         asset_base.supply,
         asset_base.marketcap_usd,
@@ -45,6 +48,12 @@ fct_asset_history AS (
         ON
             asset_prices.asset_id = asset_base.asset_id
             AND asset_prices.timestamp_utc = asset_base.timestamp_utc_24hr_ago
+    LEFT OUTER JOIN dim_assets
+        ON
+            dim_assets.asset_id = asset_base.asset_id
+            AND asset_base.timestamp_utc
+            BETWEEN dim_assets.row_effective_time
+            AND dim_assets.row_expiration_time
     ORDER BY asset_base.timepoint_id
 )
 
