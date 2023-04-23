@@ -31,7 +31,8 @@ locals {
     dataproc = ["roles/dataproc.worker"]
     dbt = [
       "roles/bigquery.dataEditor",
-      "roles/bigquery.user"
+      "roles/bigquery.user",
+      "roles/storage.objectViewer"
     ]
   }
 
