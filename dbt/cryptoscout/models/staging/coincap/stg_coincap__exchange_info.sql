@@ -13,7 +13,7 @@ exchange_info AS (
         rank,
         percenttotalvolume AS percent_total_volume,
         volumeusd AS volume_usd,
-        tradingpairs AS num_traiding_pairs,
+        tradingpairs AS num_trading_pairs,
         exchangeurl AS exchange_url,
         timestamprequestutc AS timestamp_request_utc
     FROM source

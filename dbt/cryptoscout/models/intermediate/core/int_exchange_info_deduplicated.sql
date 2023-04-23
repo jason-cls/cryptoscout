@@ -24,7 +24,7 @@ exchange_info_deduped AS (
         rank,
         percent_total_volume,
         volume_usd,
-        num_traiding_pairs,
+        num_trading_pairs,
         exchange_url
     FROM exchange_info_identify_dupes
     WHERE dupe_cnt = 1

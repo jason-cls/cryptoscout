@@ -28,7 +28,7 @@ exchange_info_regrained AS (
         rank,
         percent_total_volume,
         volume_usd,
-        num_traiding_pairs,
+        num_trading_pairs,
         exchange_url
     FROM exchange_info_day_rowcounts
     WHERE day_record_num = 1
