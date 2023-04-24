@@ -3,27 +3,199 @@ version: 2
 models:
   - name: fct_asset_history
     description: Fact table containing asset data at an hourly grain.
+    columns:
+      - name: timepoint_id
+        description: (INTEGER) Incremental surrogate primary key - unique row identifier.
+        tests:
+          - not_null
+          - unique
+      - name: date_id
+        description: (INTEGER) Date identifier represented in YYYYMMDD format.
+        tests:
+          - not_null
+      - name: asset_key
+        description: (INTEGER) Foreign surrogate key linked to an asset in dim_assets.
+        tests:
+          - not_null
+      - name: timestamp_utc
+        description: (TIMESTAMP) Point-in-time indicator in Coordinated Universal Time.
+        tests:
+          - not_null
+      - name: price_usd
+        description: (FLOAT) Volume-weighted price of the asset in US Dollars.
+      - name: supply
+        description: (FLOAT) The asset's circulating supply.
+      - name: marketcap_usd
+        description: (FLOAT) Market capitalization in US Dollars.
+      - name: price_percent_change_24hr
+        description: (FLOAT) Price value change in the last 24 hours.
 
   - name: fct_asset_dailystats
     description: Fact table containing daily point-in-time asset data.
+    columns:
+      - name: dailystat_id
+        description: (INTEGER) Incremental surrogate primary key - unique row identifier.
+        tests:
+          - not_null
+          - unique
+      - name: date_id
+        description: (INTEGER) Date identifier represented in YYYYMMDD format.
+        tests:
+          - not_null
+      - name: asset_key
+        description: (INTEGER) Foreign surrogate key linked to an asset in dim_assets.
+        tests:
+          - not_null
+      - name: timestamp_utc
+        description: (TIMESTAMP) Point-in-time indicator in Coordinated Universal Time.
+        tests:
+          - not_null
+      - name: available_supply
+        description: (FLOAT) Available supply for trading.
+      - name: volume_usd_24hr
+        description: (FLOAT) Trading volume represented in USD over the last 24 hours.
+      - name: volume_weighted_avg_price_24hr
+        description: (FLOAT) Volume Weighted Average Price over the last 24 hours.
 
   - name: fct_market_history
     description: Fact table containing OHLCV market data at an hourly grain.
-  
+    columns:
+      - name: period_id
+        description: (INTEGER) Incremental surrogate primary key - unique row identifier.
+        tests:
+          - not_null
+          - unique
+      - name: date_id
+        description: (INTEGER) Date identifier represented in YYYYMMDD format.
+        tests:
+          - not_null
+      - name: exchange_key
+        description: (INTEGER) Foreign surrogate key linked to an exchange in dim_exchanges.
+        tests:
+          - not_null
+      - name: base_asset_key
+        description: (INTEGER) Foreign surrogate key linked to a base asset in dim_assets.
+        tests:
+          - not_null
+      - name: period_start_utc
+        description: (TIMESTAMP) Start time of the period / interval in Coordinated Universal Time.
+        tests:
+          - not_null
+      - name: open
+        description: (FLOAT) The price (quote - tether) at which the first transaction was completed in a given time period.
+      - name: high
+        description: (FLOAT) The top price (quote - tether) at which the base was traded during the time period.
+      - name: low
+        description: (FLOAT) The bottom price (quote - tether) at which the base was traded during the time period.
+      - name: close
+        description: (FLOAT) The price (quote - tether) at which the last transaction was completed in the time period.
+      - name: volume
+        description: (FLOAT) The amount of base asset traded in the time period.
+
   - name: fct_exchange_dailystats
     description: Fact table containing daily point-in-time exchange data.
+    columns:
+      - name: dailystat_id
+        description: (INTEGER) Incremental surrogate primary key - unique row identifier.
+        tests:
+          - not_null
+          - unique
+      - name: date_updated_id
+        description: (INTEGER) Date identifier represented in YYYYMMDD format.
+        tests:
+          - not_null
+      - name: exchange_key
+        description: (INTEGER) Foreign surrogate key linked to an exchange in dim_exchanges.
+        tests:
+          - not_null
+      - name: timestamp_updated_utc
+        description: (TIMESTAMP) Point-in-time indicator in Coordinated Universal Time.
+        tests:
+          - not_null
+      - name: volume_usd
+        description: (FLOAT) Daily volume of an exchange represented in USD.
+      - name: percent_total_volume
+        description: >
+          (FLOAT) Amount of daily volume a single exchange transacts in relation to the
+          total daily volume of all exchanges.
 
   - name: dim_assets
     description: Dimension table describing cryptocurrency asset attributes (SCD2).
+    columns:
+      - name: asset_key
+        description: (INTEGER) Surrogate primary key identifying an asset's state within a time period.
+        tests:
+          - not_null
+          - unique
+      - name: asset_id
+        description: (STRING) Natural key of the asset.
+        tests:
+          - not_null
+      - name: full_name
+        description: (STRING) Proper name of the asset.
+        tests:
+          - not_null
+      - name: symbol
+        description: (STRING) Symbol used to identify the asset on an exchange.
+        tests:
+          - not_null
+      - name: max_supply
+        description: (FLOAT) Total quantity of asset issued.
+      - name: explorer_url
+        description: (STRING) Website URL of the explorer.
+      - name: rank
+        description: (INTEGER) Rank of the asset in terms of market cap.
+      - name: row_effective_time
+        description: (TIMESTAMP) Start of the time period at which the row is active - inclusive.
+        tests:
+          - not_null
+      - name: row_expiration_time
+        description: (TIMESTAMP) End of the time period at which the row is active - inclusive.
+        tests:
+          - not_null
+      - name: current_row_indicator
+        description: (BOOLEAN) Flag indicating whether the row is currently active.
+          - not_null
 
   - name: dim_exchanges
     description: Dimension table describing cryptocurrency exchange attributes (SCD2).
+    columns:
+      - name: exchange_key
+        description: (INTEGER) Surrogate primary key identifying an exchange's state within a time period.
+        tests:
+          - not_null
+          - unique
+      - name: exchange_id
+        description: (STRING) Natural key of the exchange.
+        tests:
+          - not_null
+      - name: full_name
+        description: (STRING) Proper name of the exchange.
+        tests:
+          - not_null
+      - name: exchange_url
+        description: (STRING) Website URL to exchange.
+      - name: rank
+        description: (INTEGER) Rank of the exchange in terms of total exchange volume.
+      - name: num_trading_pairs
+        description: (INTEGER) Number of trading pairs / markets offered by exchange.
+      - name: row_effective_time
+        description: (TIMESTAMP) Start of the time period at which the row is active - inclusive.
+        tests:
+          - not_null
+      - name: row_expiration_time
+        description: (TIMESTAMP) End of the time period at which the row is active - inclusive.
+        tests:
+          - not_null
+      - name: current_row_indicator
+        description: (BOOLEAN) Flag indicating whether the row is currently active.
+          - not_null
     
   - name: dim_date
     description: Date dimension encompassing each day from 2022-01-01 to the end of the current year.
     columns:
       - name: date_id
-        description: (INTEGER) Date identifier represented in YYYYMMDD format.
+        description: (INTEGER) Date identifier represented in YYYYMMDD format - natural primary key.
         tests:
           - not_null
           - unique
