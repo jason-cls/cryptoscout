@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: obt_asset_history
+    description: Denormalized table containing asset data at an hourly grain.
+
+  - name: obt_asset_dailystats
+    description: Denormalized table containing daily point-in-time asset data.
+
+  - name: obt_market_history
+    description: Denormalized table containing OHLCV market data at an hourly grain.
+
+  - name: obt_exchange_dailystats
+    description: Denormalized table containing daily point-in-time exchange data.

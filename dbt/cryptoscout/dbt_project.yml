@@ -35,3 +35,7 @@ models:
     intermediate:
       +schema: intermediate
       +materialized: view
+    marts:
+      +materialized: table
+      reporting:
+        +schema: reporting
