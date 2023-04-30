@@ -54,7 +54,7 @@ fct_asset_history AS (
             AND asset_base.timestamp_utc
             BETWEEN dim_assets.row_effective_time
             AND dim_assets.row_expiration_time
-    ORDER BY asset_base.timepoint_id
 )
 
 SELECT * FROM fct_asset_history
+ORDER BY timepoint_id

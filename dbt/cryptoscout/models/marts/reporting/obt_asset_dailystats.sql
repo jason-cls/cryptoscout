@@ -34,7 +34,7 @@ obt_asset_dailystats AS (
         ON fct_asset_dailystats.asset_key = dim_assets.asset_key
     LEFT OUTER JOIN dim_date
         ON fct_asset_dailystats.date_id = dim_date.date_id
-    ORDER BY fct_asset_dailystats.dailystat_id
 )
 
 SELECT * FROM obt_asset_dailystats
+ORDER BY dailystat_id

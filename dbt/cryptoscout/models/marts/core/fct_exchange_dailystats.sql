@@ -39,7 +39,7 @@ fct_exchange_dailystats AS (
             AND exchange_info_base.timestamp_updated_utc
             BETWEEN dim_exchanges.row_effective_time
             AND dim_exchanges.row_expiration_time
-    ORDER BY exchange_info_base.dailystat_id
 )
 
 SELECT * FROM fct_exchange_dailystats
+ORDER BY dailystat_id

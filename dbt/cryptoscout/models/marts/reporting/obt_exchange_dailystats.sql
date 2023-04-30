@@ -35,7 +35,7 @@ obt_exchange_dailystats AS (
         ON fct_exchange_dailystats.exchange_key = dim_exchanges.exchange_key
     LEFT OUTER JOIN dim_date
         ON fct_exchange_dailystats.date_updated_id = dim_date.date_id
-    ORDER BY fct_exchange_dailystats.dailystat_id
 )
 
 SELECT * FROM obt_exchange_dailystats
+ORDER BY dailystat_id

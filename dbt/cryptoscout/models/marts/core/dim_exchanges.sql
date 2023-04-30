@@ -75,7 +75,7 @@ dim_exchanges AS (
         END AS row_expiration_time,
         next_effective_time IS NULL AS current_row_indicator
     FROM exchanges_tmp
-    ORDER BY exchange_key
 )
 
 SELECT * FROM dim_exchanges
+ORDER BY exchange_key

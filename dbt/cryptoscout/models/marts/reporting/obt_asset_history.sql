@@ -34,7 +34,7 @@ obt_asset_history AS (
         ON fct_asset_history.asset_key = dim_assets.asset_key
     LEFT OUTER JOIN dim_date
         ON fct_asset_history.date_id = dim_date.date_id
-    ORDER BY fct_asset_history.timepoint_id
 )
 
 SELECT * FROM obt_asset_history
+ORDER BY timepoint_id

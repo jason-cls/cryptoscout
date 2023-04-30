@@ -18,7 +18,7 @@ dates AS (
         FORMAT_DATETIME('%Y-Q%Q', date_day) AS year_quarter,
         FORMAT_DATETIME('%Y-%b', date_day) AS year_month
     FROM datespine
-    ORDER BY 1 ASC
 )
 
 SELECT * FROM dates
+ORDER BY date_id

@@ -75,7 +75,7 @@ dim_assets AS (
         END AS row_expiration_time,
         next_effective_time IS NULL AS current_row_indicator
     FROM assets_tmp
-    ORDER BY asset_key
 )
 
 SELECT * FROM dim_assets
+ORDER BY asset_key

@@ -43,7 +43,7 @@ obt_market_history AS (
         ON fct_market_history.exchange_key = dim_exchanges.exchange_key
     LEFT OUTER JOIN dim_date
         ON fct_market_history.date_id = dim_date.date_id
-    ORDER BY fct_market_history.period_id
 )
 
 SELECT * FROM obt_market_history
+ORDER BY period_id

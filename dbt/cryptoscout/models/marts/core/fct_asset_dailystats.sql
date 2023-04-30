@@ -37,7 +37,7 @@ fct_asset_dailystats AS (
             AND asset_info_base.timestamp_utc
             BETWEEN dim_assets.row_effective_time
             AND dim_assets.row_expiration_time
-    ORDER BY asset_info_base.dailystat_id
 )
 
 SELECT * FROM fct_asset_dailystats
+ORDER BY dailystat_id

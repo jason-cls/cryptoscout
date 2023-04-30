@@ -55,7 +55,7 @@ fct_market_history AS (
             AND market_base.period_start_utc
             BETWEEN dim_assets.row_effective_time
             AND dim_assets.row_expiration_time
-    ORDER BY market_base.period_id
 )
 
 SELECT * FROM fct_market_history
+ORDER BY period_id
