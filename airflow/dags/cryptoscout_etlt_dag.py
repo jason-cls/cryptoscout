@@ -25,8 +25,8 @@ with DAG(
     dag_id="cryptoscout_etlt",
     description="Daily batch processing data pipeline for CryptoScout",
     schedule="0 0 * * *",
-    start_date=pendulum.datetime(2022, 1, 1, tz="UTC"),
-    end_date=pendulum.datetime(2022, 1, 2, tz="UTC"),
+    start_date=pendulum.datetime(2022, 1, 2, tz="UTC"),
+    end_date=None,
     default_args=default_operator_args,
     max_active_tasks=8,
     max_active_runs=2,
@@ -52,8 +52,11 @@ with DAG(
     latest_only = LatestOnlyOperator(task_id="latest_only")
 
     execute_dbt = BashOperator(
-        task_id="dbt_run",
-        bash_command="echo cmd_placeholder",
+        task_id="dbt_build",
+        bash_command=(
+            "source /venvs/dbt/bin/activate && cd /dbt/cryptoscout"
+            " && dbt deps && dbt build --target prod"
+        ),
         depends_on_past=True,
         trigger_rule="none_failed_min_one_success",
     )
