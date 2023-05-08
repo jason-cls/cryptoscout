@@ -8,8 +8,10 @@ terraform {
 
 locals {
   # Store sensitive data locally
-  secrets_dir = "${path.root}/secrets"
-  credentials = "${local.secrets_dir}/terraform-sa-key.json"
+  secrets_dir            = "${path.root}/secrets"
+  credentials            = "${local.secrets_dir}/terraform-sa-key.json"
+  ssh_provisioner_key    = sensitive(file("${local.secrets_dir}/tf-ssh-key"))
+  ssh_provisioner_pubkey = sensitive(file("${local.secrets_dir}/tf-ssh-key.pub"))
 
   # GCS buckets
   raw_bucket   = "raw-${var.project}"
@@ -46,8 +48,4 @@ locals {
     "dataproc.googleapis.com",
     "bigquery.googleapis.com"
   ]
-}
-
-data "local_sensitive_file" "coincap_key" {
-  filename = "${local.secrets_dir}/coincap-api-key.txt"
 }

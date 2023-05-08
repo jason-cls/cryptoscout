@@ -44,25 +44,25 @@ resource "google_service_account_key" "dbt" {
 resource "local_sensitive_file" "airflow_service_account_key" {
   filename        = "${local.secrets_dir}/airflow-sa-key.json"
   content         = base64decode(google_service_account_key.airflow.private_key)
-  file_permission = "0444"
+  file_permission = "0666"
 }
 
 resource "local_sensitive_file" "batch_service_account_key" {
   filename        = "${local.secrets_dir}/batch-sa-key.json"
   content         = base64decode(google_service_account_key.batch.private_key)
-  file_permission = "0444"
+  file_permission = "0666"
 }
 
 resource "local_sensitive_file" "dataproc_service_account_key" {
   filename        = "${local.secrets_dir}/dataproc-sa-key.json"
   content         = base64decode(google_service_account_key.dataproc.private_key)
-  file_permission = "0444"
+  file_permission = "0666"
 }
 
 resource "local_sensitive_file" "dbt_service_account_key" {
   filename        = "${local.secrets_dir}/dbt-sa-key.json"
   content         = base64decode(google_service_account_key.dbt.private_key)
-  file_permission = "0444"
+  file_permission = "0666"
 }
 
 

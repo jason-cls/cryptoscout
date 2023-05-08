@@ -30,5 +30,60 @@ resource "google_compute_firewall" "internal_ingress" {
     ports    = ["0-65535"]
   }
 
-  source_ranges = toset(["10.128.0.0/20"])
+  source_ranges = ["10.128.0.0/20"]
+}
+
+resource "google_compute_firewall" "external_ingress" {
+  name      = "allow-external-ingress"
+  network   = google_compute_network.vpc.name
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["8080"]
+  }
+
+  source_ranges = [var.local_ip_cidr]
+  target_tags   = ["airflow-webserver"]
+}
+
+resource "google_compute_firewall" "allow_http" {
+  name      = "allow-http"
+  network   = google_compute_network.vpc.name
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["http-server"]
+}
+
+resource "google_compute_firewall" "allow_https" {
+  name      = "allow-https"
+  network   = google_compute_network.vpc.name
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["443"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+  target_tags   = ["https-server"]
+}
+
+resource "google_compute_firewall" "ssh" {
+  name      = "allow-ssh"
+  network   = google_compute_network.vpc.name
+  direction = "INGRESS"
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
 }

@@ -92,7 +92,7 @@ resource "google_cloud_run_service" "batch_ingest_api" {
         image = "${var.region}-docker.pkg.dev/${var.project}/${var.repository}/${var.batchingest_image}"
         env {
           name  = "COINCAP_API_KEY"
-          value = data.local_sensitive_file.coincap_key.content
+          value = var.coincap_api_key
         }
       }
       container_concurrency = 0
@@ -103,6 +103,59 @@ resource "google_cloud_run_service" "batch_ingest_api" {
   traffic {
     percent         = 100
     latest_revision = true
+  }
+}
+
+resource "google_compute_instance" "airflow_vm" {
+  name                      = "airflow-vm"
+  machine_type              = "e2-standard-2"
+  allow_stopping_for_update = true
+
+  tags = ["airflow-webserver", "http-server", "https-server"]
+
+  boot_disk {
+    initialize_params {
+      image = "debian-cloud/debian-11"
+      size  = 30
+    }
+  }
+
+  network_interface {
+    subnetwork = google_compute_subnetwork.vm_subnet.name
+    access_config {}
+  }
+
+  service_account {
+    email  = google_service_account.airflow.email
+    scopes = ["cloud-platform"]
+  }
+
+  metadata = {
+    "ssh-keys" = "${var.ssh_provisioner_user}:${local.ssh_provisioner_pubkey}"
+  }
+  metadata_startup_script = file("${path.root}/vm_scripts/startup.sh")
+
+  # Initial VM setup tasks
+  connection {
+    type        = "ssh"
+    user        = var.ssh_provisioner_user
+    private_key = local.ssh_provisioner_key
+    host        = self.network_interface.0.access_config.0.nat_ip
+    port        = 22
+  }
+
+  provisioner "file" {
+    source      = local_sensitive_file.dbt_service_account_key.filename
+    destination = "/tmp/dbt-sa-key.json"
+  }
+
+  provisioner "file" {
+    source      = local_sensitive_file.airflow_req_dotenv.filename
+    destination = "/tmp/req.env"
+  }
+
+  provisioner "remote-exec" {
+    script = "${path.root}/vm_scripts/initial-setup.sh"
   }
 }
 

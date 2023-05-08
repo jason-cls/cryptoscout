@@ -57,3 +57,21 @@ variable "batchingest_image" {
   type        = string
   default     = "batch-ingest-api"
 }
+
+variable "coincap_api_key" {
+  description = "The CoinCap API key from generated from https://coincap.io/api-key"
+  type        = string
+  sensitive   = true
+}
+
+variable "local_ip_cidr" {
+  description = "The IPv4 CIDR range to allow external ingress to the Airflow webserver."
+  type        = string
+  sensitive   = true
+}
+
+variable "ssh_provisioner_user" {
+  description = "The username Terraform uses to provision VMs via ssh."
+  type        = string
+  default     = "terraform"
+}

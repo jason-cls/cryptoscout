@@ -10,7 +10,7 @@
 
 GCP_PROJECT="cryptoscout"
 SERVICEACC_NAME="terraform"
-SERVICEACC_ROLES=("roles/editor" "roles/iam.securityAdmin" "roles/storage.objectAdmin" "roles/artifactregistry.admin" "roles/run.admin")
+SERVICEACC_ROLES=("roles/editor" "roles/iam.securityAdmin" "roles/storage.objectAdmin" "roles/artifactregistry.admin" "roles/run.admin" "roles/compute.instanceAdmin.v1")
 GCS_TFBACKEND_BKT_NAME="terraform-backend-cs"
 GCS_BKT_LOCATION="us-central1"
 
