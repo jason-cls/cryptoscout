@@ -12,10 +12,11 @@ if [ -d "$REPO_DIR" ] \
 && [ -f "${REPO_DIR}/dbt/cryptoscout/.secrets/dbt-sa-key.json" ] \
 && [ -f "${REPO_DIR}/airflow/req.env" ] \
 && [ -f "${REPO_DIR}/airflow/Dockerfile" ] \
-&& [ -f "${REPO_DIR}/airflow/docker-compose.yaml"]; then
+&& [ -f "${REPO_DIR}/airflow/docker-compose.yaml" ]; then
   cd "${REPO_DIR}/airflow/"
   make airflow-init
   make up
+  echo "Started Airflow on VM boot!"
 else
   echo "Unable to start Airflow services. Required files in ${REPO_DIR} are missing."
 fi
