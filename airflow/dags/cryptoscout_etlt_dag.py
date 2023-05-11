@@ -24,7 +24,7 @@ default_operator_args = {
 with DAG(
     dag_id="cryptoscout_etlt",
     description="Daily batch processing data pipeline for CryptoScout",
-    schedule="0 0 * * *",
+    schedule="15 0 * * *",
     start_date=pendulum.datetime(2022, 1, 2, tz="UTC"),
     end_date=None,
     default_args=default_operator_args,
