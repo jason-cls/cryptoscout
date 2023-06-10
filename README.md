@@ -14,6 +14,7 @@ The following secondary design and personal objectives were kept in mind when de
 ### Source Data
 All source data used in this project is extracted from different [CoinCap](https://coincap.io/) API endpoints. While some endpoints used offer historical data, others offer only snapshotted time-of-request data. CoinCap itself is a tool which collects real-time cryptocurrency exchange data from multiple markets.
 
+- The pipeline was run for approximately a month (May 2023), with historical data backfilled from Jan 2022.
 - Due to API rate limitations, as well as an effort to keep GCP costs low, only a limited subset of cryptocurrency assets and exchanges are considered for the limited purposes of this project.
 - Unfortunately, CoinCap stopped supporting the `/candles` endpoint in early 2023.
 
@@ -33,6 +34,17 @@ All source data used in this project is extracted from different [CoinCap](https
 
 ## Data Pipeline Architecture
 ![](./images/data_pipeline_architecture.svg)
+<details>
+    <summary>Airflow DAG</summary>
+
+![](./images/airflow_dag.png)
+</details>
+
+<details>
+    <summary>dbt DAG</summary>
+
+![](./images/dbt_dag.png)
+</details>
 
 ## Dimensional Model
 A Kimball methodology was applied to dimensionally model the data in the data warehouse. An ERD depicting the relationships between fact and dimension tables is presented below:
